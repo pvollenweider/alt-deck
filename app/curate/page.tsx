@@ -4,12 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   curate,
+  generateThirdCard,
   CurationProfile,
   CurationPair,
   ExperienceLevel,
   Flexibility,
 } from "@/lib/engine";
-import { SuitableFor as BandSize, RiskLevel } from "@/lib/cards";
+import { Card, SuitableFor as BandSize, RiskLevel } from "@/lib/cards";
 import { CardDisplay } from "@/components/CardDisplay";
 
 const DEFAULT_PROFILE: CurationProfile = {
@@ -58,17 +59,31 @@ export default function CuratePage() {
   const [profile, setProfile] = useState<CurationProfile>(DEFAULT_PROFILE);
   const [results, setResults] = useState<CurationPair[] | null>(null);
   const [curated, setCurated] = useState(false);
+  const [thirdCards, setThirdCards] = useState<Record<string, Card | null>>({});
 
   const handleCurate = () => {
     const pairs = curate(profile);
     setResults(pairs);
     setCurated(true);
+    setThirdCards({});
+  };
+
+  const pairKey = (pair: CurationPair) => `${pair.card1.id}-${pair.card2.id}`;
+
+  const handleAddThird = (pair: CurationPair) => {
+    const card3 = generateThirdCard(pair.card1, pair.card2, []);
+    setThirdCards((prev) => ({ ...prev, [pairKey(pair)]: card3 }));
+  };
+
+  const handleRemoveThird = (pair: CurationPair) => {
+    setThirdCards((prev) => ({ ...prev, [pairKey(pair)]: null }));
   };
 
   const handleLaunchSession = (pair: CurationPair) => {
+    const card3 = thirdCards[pairKey(pair)];
     sessionStorage.setItem(
       "altdeck_active_session",
-      JSON.stringify({ card1: pair.card1, card2: pair.card2 })
+      JSON.stringify({ card1: pair.card1, card2: pair.card2, ...(card3 ? { card3 } : {}) })
     );
     router.push("/session");
   };
@@ -177,19 +192,39 @@ export default function CuratePage() {
                 {results.length} paire{results.length !== 1 ? "s" : ""} suggérée{results.length !== 1 ? "s" : ""} — Classées par pertinence artistique + potentiel de transformation
               </div>
               <div className="flex flex-col gap-8">
-                {results.map((pair, i) => (
-                  <div key={`${pair.card1.id}-${pair.card2.id}`} className="border border-[#ddd5cc] p-6 bg-[#faf7f4]" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-                    <div className="flex items-center justify-between mb-6">
+                {results.map((pair, i) => {
+                  const key = pairKey(pair);
+                  const card3 = thirdCards[key];
+                  return (
+                  <div key={key} className="border border-[#ddd5cc] p-6 bg-[#faf7f4]" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+                    <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                       <div className="flex items-center gap-4">
                         <span className="text-[#6b6560] text-xs tracking-widest uppercase font-medium">Paire {i + 1}</span>
                         <span className="text-[#4f4f49] text-xs">
                           Score : {pair.rank_score.toFixed(2)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3 flex-wrap">
                         <span className="text-[#6b6560] text-xs uppercase tracking-wider">
-                          {pair.card1.category} + {pair.card2.category}
+                          {pair.card1.category} + {pair.card2.category}{card3 ? ` + ${card3.category}` : ""}
                         </span>
+                        {!card3 ? (
+                          <button
+                            onClick={() => handleAddThird(pair)}
+                            className="text-xs tracking-widest px-4 py-2 border border-[#9a7820] text-[#9a7820] hover:bg-[#9a7820] hover:text-white uppercase transition-colors bg-[#faf7f4] font-bold"
+                            style={{ borderRadius: "2px" }}
+                          >
+                            + 3ÈME
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleRemoveThird(pair)}
+                            className="text-xs tracking-widest px-4 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#b84a30] hover:border-[#b84a30] uppercase transition-colors bg-[#faf7f4]"
+                            style={{ borderRadius: "2px" }}
+                          >
+                            RETIRER
+                          </button>
+                        )}
                         <button
                           onClick={() => handleLaunchSession(pair)}
                           className="text-xs tracking-widest px-6 py-2 bg-[#b84a30] text-white font-bold hover:bg-[#8c3622] uppercase transition-colors"
@@ -199,12 +234,14 @@ export default function CuratePage() {
                         </button>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className={`grid gap-4 ${card3 ? "grid-cols-3" : "grid-cols-2"}`}>
                       <CardDisplay card={pair.card1} />
                       <CardDisplay card={pair.card2} />
+                      {card3 && <CardDisplay card={card3} />}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

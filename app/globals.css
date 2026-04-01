@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
+@import "tailwindcss";
 
 :root {
   --bg: #f5f0eb;
@@ -14,7 +14,8 @@
 }
 
 body {
-  background: var(--bg);
+  background: #f5f0eb !important;
+  background-color: #f5f0eb !important;
   color: var(--text);
   font-family: "Poppins", Arial, sans-serif;
   font-size: 16px;

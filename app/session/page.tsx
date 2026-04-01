@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, totalScore, CATEGORY_BG, CATEGORY_BORDER, CATEGORY_TEXT } from "@/lib/cards";
-import { generateSession } from "@/lib/engine";
+import { generateSession, generateThirdCard } from "@/lib/engine";
 
 interface ActiveSession {
   card1: Card;
   card2: Card;
+  card3?: Card;
 }
 
 function SessionCard({ card, label }: { card: Card; label: string }) {
@@ -128,6 +129,23 @@ export default function SessionPage() {
     }
   };
 
+  const handleAddThirdCard = () => {
+    if (!session) return;
+    const card3 = generateThirdCard(session.card1, session.card2, []);
+    if (card3) {
+      const updated = { ...session, card3 };
+      sessionStorage.setItem("altdeck_active_session", JSON.stringify(updated));
+      setSession(updated);
+    }
+  };
+
+  const handleRemoveThirdCard = () => {
+    if (!session) return;
+    const updated = { card1: session.card1, card2: session.card2 };
+    sessionStorage.setItem("altdeck_active_session", JSON.stringify(updated));
+    setSession(updated);
+  };
+
   if (!loaded) {
     return (
       <div className="max-w-6xl mx-auto px-6 py-12">
@@ -175,6 +193,9 @@ export default function SessionPage() {
 
   const score1 = totalScore(session.card1);
   const score2 = totalScore(session.card2);
+  const score3 = session.card3 ? totalScore(session.card3) : null;
+  const totalLoad = score1 + score2 + (score3 ?? 0);
+  const maxLoad = session.card3 ? 45 : 30;
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
@@ -185,10 +206,28 @@ export default function SessionPage() {
           <h1 className="text-3xl font-bold tracking-widest text-[#1a1a18] font-mono">SESSION</h1>
           <div className="w-10 h-0.5 bg-[#b84a30] mt-2" />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap justify-end">
           <div className="text-[#6b6560] text-xs tracking-widest px-4 py-2 border border-[#ddd5cc] bg-[#faf7f4] uppercase">
-            Charge totale : {score1 + score2}/30
+            Charge totale : {totalLoad}/{maxLoad}
           </div>
+          {!session.card3 && (
+            <button
+              onClick={handleAddThirdCard}
+              className="text-xs tracking-widest px-6 py-2 border border-[#9a7820] text-[#9a7820] hover:bg-[#9a7820] hover:text-white uppercase transition-colors bg-[#faf7f4] font-bold"
+              style={{ borderRadius: "2px" }}
+            >
+              + 3ÈME CONTRAINTE
+            </button>
+          )}
+          {session.card3 && (
+            <button
+              onClick={handleRemoveThirdCard}
+              className="text-xs tracking-widest px-6 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#b84a30] hover:border-[#b84a30] uppercase transition-colors bg-[#faf7f4]"
+              style={{ borderRadius: "2px" }}
+            >
+              RETIRER LA 3ÈME
+            </button>
+          )}
           <button
             onClick={() => router.push("/generate")}
             className="text-xs tracking-widest px-6 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4]"
@@ -207,7 +246,7 @@ export default function SessionPage() {
       </div>
 
       {/* Validation status */}
-      <div className="flex items-center gap-6 border border-[#ddd5cc] bg-[#faf7f4] px-6 py-3 mb-6 text-xs tracking-wider">
+      <div className="flex items-center gap-6 border border-[#ddd5cc] bg-[#faf7f4] px-6 py-3 mb-6 text-xs tracking-wider flex-wrap">
         <span className="text-[#2d7a53] font-bold uppercase">✓ Session valide</span>
         <span className="text-[#ddd5cc]">|</span>
         <span className="text-[#6b6560]">
@@ -221,12 +260,23 @@ export default function SessionPage() {
           <span className="text-[#1a1a18] font-medium">{session.card2.category}</span>{" "}
           — score <span className={score2 >= 8 ? "text-[#1a1a18] font-bold" : "text-[#b84a30] font-bold"}>{score2}</span>
         </span>
+        {session.card3 && score3 !== null && (
+          <>
+            <span className="text-[#ddd5cc]">|</span>
+            <span className="text-[#6b6560]">
+              Carte 3 :{" "}
+              <span className="text-[#1a1a18] font-medium">{session.card3.category}</span>{" "}
+              — score <span className={score3 >= 8 ? "text-[#1a1a18] font-bold" : "text-[#b84a30] font-bold"}>{score3}</span>
+            </span>
+          </>
+        )}
       </div>
 
       {/* Cards */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className={`grid gap-6 ${session.card3 ? "grid-cols-3" : "grid-cols-2"}`}>
         <SessionCard card={session.card1} label="CARTE 1" />
         <SessionCard card={session.card2} label="CARTE 2" />
+        {session.card3 && <SessionCard card={session.card3} label="CARTE 3" />}
       </div>
 
       {/* Footer */}

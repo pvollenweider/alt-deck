@@ -2,8 +2,9 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { generateSession, GenerateResult } from "@/lib/engine";
-import { totalScore } from "@/lib/cards";
+import { generateSession, generateThirdCard, GenerateResult } from "@/lib/engine";
+import { Card, totalScore } from "@/lib/cards";
+
 import { CardDisplay } from "@/components/CardDisplay";
 
 const RECENTLY_USED_KEY = "altdeck_recently_used";
@@ -30,6 +31,7 @@ export default function GeneratePage() {
   const [result, setResult] = useState<GenerateResult | null>(null);
   const [generated, setGenerated] = useState(false);
   const [recentIds, setRecentIds] = useState<string[]>([]);
+  const [thirdCard, setThirdCard] = useState<Card | null>(null);
 
   const handleGenerate = useCallback(() => {
     const recent = getRecentlyUsed();
@@ -38,15 +40,24 @@ export default function GeneratePage() {
       pushRecentlyUsed([session.card1.id, session.card2.id]);
       setRecentIds(getRecentlyUsed());
       setResult(session);
+      setThirdCard(null);
     }
     setGenerated(true);
   }, []);
 
+  const handleAddThirdCard = useCallback(() => {
+    if (!result) return;
+    const recent = getRecentlyUsed();
+    const card = generateThirdCard(result.card1, result.card2, recent);
+    setThirdCard(card);
+  }, [result]);
+
   const handleLaunchSession = () => {
     if (!result) return;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sessionStorage.setItem(
       "altdeck_active_session",
-      JSON.stringify({ card1: result.card1, card2: result.card2 })
+      JSON.stringify({ card1: result.card1, card2: result.card2, ...(thirdCard ? { card3: thirdCard } : {}) })
     );
     router.push("/session");
   };
@@ -115,7 +126,7 @@ export default function GeneratePage() {
           </div>
 
           {/* Cards */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className={`grid gap-4 mb-6 ${thirdCard ? "grid-cols-3" : "grid-cols-2"}`}>
             <div>
               <div className="text-[#6b6560] text-xs tracking-widest mb-3 uppercase font-medium">
                 Carte 1 — Score {result.score1}/15
@@ -128,10 +139,18 @@ export default function GeneratePage() {
               </div>
               <CardDisplay card={result.card2} />
             </div>
+            {thirdCard && (
+              <div>
+                <div className="text-[#6b6560] text-xs tracking-widest mb-3 uppercase font-medium">
+                  Carte 3 — Score {totalScore(thirdCard)}/15
+                </div>
+                <CardDisplay card={thirdCard} />
+              </div>
+            )}
           </div>
 
           {/* Actions */}
-          <div className="flex gap-4 border-t border-[#ddd5cc] pt-6">
+          <div className="flex gap-4 border-t border-[#ddd5cc] pt-6 flex-wrap">
             <button
               onClick={handleLaunchSession}
               className="text-sm tracking-widest px-8 py-3 bg-[#b84a30] text-white font-bold hover:bg-[#8c3622] uppercase transition-colors"
@@ -139,6 +158,24 @@ export default function GeneratePage() {
             >
               LANCER LA SESSION →
             </button>
+            {!thirdCard && (
+              <button
+                onClick={handleAddThirdCard}
+                className="text-sm tracking-widest px-8 py-3 border border-[#9a7820] text-[#9a7820] hover:bg-[#9a7820] hover:text-white uppercase transition-colors bg-[#faf7f4] font-bold"
+                style={{ borderRadius: "2px" }}
+              >
+                + 3ÈME CONTRAINTE
+              </button>
+            )}
+            {thirdCard && (
+              <button
+                onClick={handleAddThirdCard}
+                className="text-sm tracking-widest px-8 py-3 border border-[#9a7820] text-[#9a7820] hover:bg-[#9a7820] hover:text-white uppercase transition-colors bg-[#faf7f4]"
+                style={{ borderRadius: "2px" }}
+              >
+                CHANGER LA 3ÈME
+              </button>
+            )}
             <button
               onClick={handleGenerate}
               className="text-sm tracking-widest px-8 py-3 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4]"

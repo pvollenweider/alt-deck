@@ -63,6 +63,20 @@ export interface GenerateResult {
   score2: number;
 }
 
+export function generateThirdCard(card1: Card, card2: Card, recentlyUsed: string[] = []): Card | null {
+  const pool = CARDS.filter(
+    (c) =>
+      c.id !== card1.id &&
+      c.id !== card2.id &&
+      c.category !== card1.category &&
+      c.category !== card2.category &&
+      !isBlacklisted(c, card1) &&
+      !isBlacklisted(c, card2) &&
+      totalScore(c) >= 8
+  );
+  return weightedPick(pool, recentlyUsed);
+}
+
 export function generateSession(recentlyUsed: string[] = []): GenerateResult | null {
   const eligiblePool = CARDS.filter((c) => totalScore(c) >= 8);
   if (eligiblePool.length < 2) return null;
