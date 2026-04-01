@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card, totalScore, CATEGORY_BG, CATEGORY_BORDER, CATEGORY_TEXT } from "@/lib/cards";
+import { Card, totalScore, CATEGORY_BG, CATEGORY_BORDER } from "@/lib/cards";
 import { generateSession, generateThirdCard } from "@/lib/engine";
 
 interface ActiveSession {
@@ -15,7 +15,7 @@ function SessionCard({ card, label }: { card: Card; label: string }) {
   const score = totalScore(card);
   return (
     <div
-      className={`bg-[#faf7f4] border-l-4 ${CATEGORY_BORDER[card.category]} border border-[#ddd5cc] p-10 flex flex-col gap-6 min-h-[480px]`}
+      className={`bg-[#faf7f4] border-l-4 ${CATEGORY_BORDER[card.category]} border border-[#ddd5cc] p-6 sm:p-10 flex flex-col gap-4 sm:gap-6`}
       style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}
     >
       {/* Top row */}
@@ -28,12 +28,12 @@ function SessionCard({ card, label }: { card: Card; label: string }) {
       </div>
 
       {/* Title */}
-      <div className="text-5xl font-bold text-[#1a1a18] tracking-wider leading-none font-mono">
+      <div className="text-3xl sm:text-5xl font-bold text-[#1a1a18] tracking-wider leading-none font-mono">
         {card.title}
       </div>
 
       {/* Description */}
-      <div className="text-lg text-[#4f4f49] leading-relaxed flex-1">
+      <div className="text-base sm:text-lg text-[#4f4f49] leading-relaxed flex-1">
         {card.description}
       </div>
 
@@ -58,8 +58,8 @@ function SessionCard({ card, label }: { card: Card; label: string }) {
       </div>
 
       {/* Score bar */}
-      <div className="border-t border-[#ddd5cc] pt-5 flex items-center justify-between">
-        <div className="flex gap-6 text-xs text-[#6b6560]">
+      <div className="border-t border-[#ddd5cc] pt-4 sm:pt-5 flex items-center justify-between">
+        <div className="flex gap-4 sm:gap-6 text-xs text-[#6b6560]">
           <span>
             STR <span className="text-[#4f4f49] font-semibold">{card.scores.structural_impact}</span>
           </span>
@@ -148,7 +148,7 @@ export default function SessionPage() {
 
   if (!loaded) {
     return (
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="text-[#6b6560] text-xs tracking-widest">CHARGEMENT...</div>
       </div>
     );
@@ -156,31 +156,31 @@ export default function SessionPage() {
 
   if (!session) {
     return (
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        <div className="mb-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mb-6 sm:mb-8">
           <div className="text-[#6b6560] text-xs tracking-widest mb-2 uppercase font-medium">Vue performance</div>
-          <h1 className="text-3xl font-bold tracking-widest text-[#1a1a18] font-mono">SESSION</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-widest text-[#1a1a18] font-mono">SESSION</h1>
           <div className="w-10 h-0.5 bg-[#b84a30] mt-2" />
         </div>
 
-        <div className="border border-[#ddd5cc] p-12 text-center bg-[#faf7f4]">
-          <div className="text-[#4f4f49] text-sm tracking-wider mb-8 uppercase font-medium">
+        <div className="border border-[#ddd5cc] p-8 sm:p-12 text-center bg-[#faf7f4]">
+          <div className="text-[#4f4f49] text-sm tracking-wider mb-6 sm:mb-8 uppercase font-medium">
             Aucune session active
           </div>
-          <div className="text-[#6b6560] text-xs tracking-wider mb-10 max-w-md mx-auto leading-relaxed">
+          <div className="text-[#6b6560] text-xs tracking-wider mb-8 sm:mb-10 max-w-md mx-auto leading-relaxed">
             Aller sur GÉNÉRER ou CURATION pour créer une session, ou générer rapidement ici.
           </div>
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={handleQuickGenerate}
-              className="text-sm tracking-widest px-10 py-3 bg-[#b84a30] text-white font-bold hover:bg-[#8c3622] uppercase transition-colors"
+              className="text-sm tracking-widest px-8 sm:px-10 py-3 bg-[#b84a30] text-white font-bold hover:bg-[#8c3622] uppercase transition-colors"
               style={{ borderRadius: "2px" }}
             >
               GÉNÉRATION RAPIDE →
             </button>
             <button
               onClick={() => router.push("/generate")}
-              className="text-sm tracking-widest px-10 py-3 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4]"
+              className="text-sm tracking-widest px-8 sm:px-10 py-3 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4]"
               style={{ borderRadius: "2px" }}
             >
               ALLER À GÉNÉRER
@@ -198,46 +198,46 @@ export default function SessionPage() {
   const maxLoad = session.card3 ? 45 : 30;
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <div className="text-[#6b6560] text-xs tracking-widest mb-2 uppercase font-medium">Vue performance</div>
-          <h1 className="text-3xl font-bold tracking-widest text-[#1a1a18] font-mono">SESSION</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-widest text-[#1a1a18] font-mono">SESSION</h1>
           <div className="w-10 h-0.5 bg-[#b84a30] mt-2" />
         </div>
-        <div className="flex items-center gap-3 flex-wrap justify-end">
-          <div className="text-[#6b6560] text-xs tracking-widest px-4 py-2 border border-[#ddd5cc] bg-[#faf7f4] uppercase">
-            Charge totale : {totalLoad}/{maxLoad}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="text-[#6b6560] text-xs tracking-widest px-3 sm:px-4 py-2 border border-[#ddd5cc] bg-[#faf7f4] uppercase">
+            Charge : {totalLoad}/{maxLoad}
           </div>
           {!session.card3 && (
             <button
               onClick={handleAddThirdCard}
-              className="text-xs tracking-widest px-6 py-2 border border-[#9a7820] text-[#9a7820] hover:bg-[#9a7820] hover:text-white uppercase transition-colors bg-[#faf7f4] font-bold"
+              className="text-xs tracking-widest px-4 sm:px-6 py-2 border border-[#9a7820] text-[#9a7820] hover:bg-[#9a7820] hover:text-white uppercase transition-colors bg-[#faf7f4] font-bold"
               style={{ borderRadius: "2px" }}
             >
-              + 3ÈME CONTRAINTE
+              + 3ÈME
             </button>
           )}
           {session.card3 && (
             <button
               onClick={handleRemoveThirdCard}
-              className="text-xs tracking-widest px-6 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#b84a30] hover:border-[#b84a30] uppercase transition-colors bg-[#faf7f4]"
+              className="text-xs tracking-widest px-4 sm:px-6 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#b84a30] hover:border-[#b84a30] uppercase transition-colors bg-[#faf7f4]"
               style={{ borderRadius: "2px" }}
             >
-              RETIRER LA 3ÈME
+              RETIRER 3ÈME
             </button>
           )}
           <button
             onClick={() => router.push("/generate")}
-            className="text-xs tracking-widest px-6 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4]"
+            className="text-xs tracking-widest px-4 sm:px-6 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4]"
             style={{ borderRadius: "2px" }}
           >
-            NOUVELLE SESSION
+            NOUVELLE
           </button>
           <button
             onClick={handleQuickGenerate}
-            className="text-xs tracking-widest px-6 py-2 bg-[#b84a30] text-white font-bold hover:bg-[#8c3622] uppercase transition-colors"
+            className="text-xs tracking-widest px-4 sm:px-6 py-2 bg-[#b84a30] text-white font-bold hover:bg-[#8c3622] uppercase transition-colors"
             style={{ borderRadius: "2px" }}
           >
             ALÉATOIRE
@@ -246,41 +246,38 @@ export default function SessionPage() {
       </div>
 
       {/* Validation status */}
-      <div className="flex items-center gap-6 border border-[#ddd5cc] bg-[#faf7f4] px-6 py-3 mb-6 text-xs tracking-wider flex-wrap">
-        <span className="text-[#2d7a53] font-bold uppercase">✓ Session valide</span>
-        <span className="text-[#ddd5cc]">|</span>
+      <div className="flex flex-wrap items-center gap-3 sm:gap-6 border border-[#ddd5cc] bg-[#faf7f4] px-4 sm:px-6 py-3 mb-6 text-xs tracking-wider">
+        <span className="text-[#2d7a53] font-bold uppercase">✓ Valide</span>
+        <span className="text-[#ddd5cc] hidden sm:inline">|</span>
         <span className="text-[#6b6560]">
-          Carte 1 :{" "}
-          <span className="text-[#1a1a18] font-medium">{session.card1.category}</span>{" "}
-          — score <span className={score1 >= 8 ? "text-[#1a1a18] font-bold" : "text-[#b84a30] font-bold"}>{score1}</span>
+          C1 : <span className="text-[#1a1a18] font-medium">{session.card1.category}</span>{" "}
+          <span className={score1 >= 8 ? "text-[#1a1a18] font-bold" : "text-[#b84a30] font-bold"}>{score1}</span>
         </span>
-        <span className="text-[#ddd5cc]">|</span>
+        <span className="text-[#ddd5cc] hidden sm:inline">|</span>
         <span className="text-[#6b6560]">
-          Carte 2 :{" "}
-          <span className="text-[#1a1a18] font-medium">{session.card2.category}</span>{" "}
-          — score <span className={score2 >= 8 ? "text-[#1a1a18] font-bold" : "text-[#b84a30] font-bold"}>{score2}</span>
+          C2 : <span className="text-[#1a1a18] font-medium">{session.card2.category}</span>{" "}
+          <span className={score2 >= 8 ? "text-[#1a1a18] font-bold" : "text-[#b84a30] font-bold"}>{score2}</span>
         </span>
         {session.card3 && score3 !== null && (
           <>
-            <span className="text-[#ddd5cc]">|</span>
+            <span className="text-[#ddd5cc] hidden sm:inline">|</span>
             <span className="text-[#6b6560]">
-              Carte 3 :{" "}
-              <span className="text-[#1a1a18] font-medium">{session.card3.category}</span>{" "}
-              — score <span className={score3 >= 8 ? "text-[#1a1a18] font-bold" : "text-[#b84a30] font-bold"}>{score3}</span>
+              C3 : <span className="text-[#1a1a18] font-medium">{session.card3.category}</span>{" "}
+              <span className={score3 >= 8 ? "text-[#1a1a18] font-bold" : "text-[#b84a30] font-bold"}>{score3}</span>
             </span>
           </>
         )}
       </div>
 
       {/* Cards */}
-      <div className={`grid gap-6 ${session.card3 ? "grid-cols-3" : "grid-cols-2"}`}>
+      <div className={`grid gap-4 sm:gap-6 grid-cols-1 ${session.card3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
         <SessionCard card={session.card1} label="CARTE 1" />
         <SessionCard card={session.card2} label="CARTE 2" />
         {session.card3 && <SessionCard card={session.card3} label="CARTE 3" />}
       </div>
 
       {/* Footer */}
-      <div className="mt-8 border-t border-[#ddd5cc] pt-8 text-center">
+      <div className="mt-6 sm:mt-8 border-t border-[#ddd5cc] pt-6 sm:pt-8 text-center">
         <div className="text-[#6b6560] text-xs tracking-widest uppercase">
           Ces contraintes sont actives pour toute la durée de cette session. Pas de négociation.
         </div>
