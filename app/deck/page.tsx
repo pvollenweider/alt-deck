@@ -1,20 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { CARDS, Category, totalScore, CATEGORY_BG } from "@/lib/cards";
+import { CARDS, Nature, totalScore, NATURE_BG } from "@/lib/cards";
 import { CardDisplay } from "@/components/CardDisplay";
 
-const CATEGORIES: (Category | "ALL")[] = ["ALL", "STRUCTURE", "ROLE", "SOUND", "DEVICE"];
+const NATURES: (Nature | "ALL")[] = ["ALL", "STRUCTURAL", "COGNITIVE", "SONIC", "PHYSICAL"];
 
 export default function DeckPage() {
-  const [activeCategory, setActiveCategory] = useState<Category | "ALL">("ALL");
+  const [activeNature, setActiveNature] = useState<Nature | "ALL">("ALL");
 
-  const filtered = activeCategory === "ALL"
+  const filtered = activeNature === "ALL"
     ? CARDS
-    : CARDS.filter((c) => c.category === activeCategory);
+    : CARDS.filter((c) => c.nature === activeNature);
 
-  const categoryCount = (cat: Category | "ALL") =>
-    cat === "ALL" ? CARDS.length : CARDS.filter((c) => c.category === cat).length;
+  const natureCount = (n: Nature | "ALL") =>
+    n === "ALL" ? CARDS.length : CARDS.filter((c) => c.nature === n).length;
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -27,19 +27,19 @@ export default function DeckPage() {
 
       {/* Filter bar */}
       <div className="flex overflow-x-auto mb-8 sm:mb-10 border border-[#ddd5cc] w-fit max-w-full bg-[#faf7f4]">
-        {CATEGORIES.map((cat) => (
+        {NATURES.map((n) => (
           <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
+            key={n}
+            onClick={() => setActiveNature(n)}
             className={`shrink-0 px-3 sm:px-5 py-2 text-xs tracking-widest border-r border-[#ddd5cc] last:border-r-0 font-medium uppercase transition-colors ${
-              activeCategory === cat
-                ? cat === "ALL"
+              activeNature === n
+                ? n === "ALL"
                   ? "bg-[#b84a30] text-white"
-                  : `${CATEGORY_BG[cat as Category]} text-white`
+                  : `${NATURE_BG[n as Nature]} text-white`
                 : "text-[#6b6560] hover:text-[#1a1a18] hover:bg-[#f5f0eb]"
             }`}
           >
-            {cat === "ALL" ? "Tout" : cat} ({categoryCount(cat)})
+            {n === "ALL" ? "Tout" : n} ({natureCount(n)})
           </button>
         ))}
       </div>

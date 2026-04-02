@@ -11,8 +11,8 @@ export default function HomePage() {
     {
       href: "/deck",
       label: "DECK",
-      description: "Parcourir les 20 cartes de contraintes. Filtrer par catégorie.",
-      detail: `${totalCards} cartes, 4 catégories`,
+      description: "Parcourir toutes les cartes de contraintes. Filtrer par nature.",
+      detail: `${totalCards} cartes, 4 natures`,
     },
     {
       href: "/generate",
@@ -39,7 +39,7 @@ export default function HomePage() {
       {/* Header */}
       <div className="mb-16">
         <div className="text-[#6b6560] text-xs tracking-widest mb-4 uppercase font-medium">
-          Moteur de contraintes v1.0
+          Moteur de contraintes v2.0
         </div>
         <h1 className="text-5xl font-bold tracking-widest text-[#1a1a18] mb-2 font-mono">
           ALT-DECK
@@ -62,12 +62,12 @@ export default function HomePage() {
           <div className="text-3xl font-bold text-[#1a1a18]">{avgScore}<span className="text-lg text-[#6b6560] font-normal">/15</span></div>
         </div>
         <div className="p-6">
-          <div className="text-[#6b6560] text-xs tracking-widest mb-2 uppercase">Catégories</div>
+          <div className="text-[#6b6560] text-xs tracking-widest mb-2 uppercase">Natures</div>
           <div className="flex gap-2 flex-wrap">
-            <span className="text-xs bg-[#b84a30] text-white px-2 py-0.5 font-medium tracking-wider">STRUCTURE</span>
-            <span className="text-xs bg-[#2d5fa0] text-white px-2 py-0.5 font-medium tracking-wider">ROLE</span>
-            <span className="text-xs bg-[#2d7a53] text-white px-2 py-0.5 font-medium tracking-wider">SOUND</span>
-            <span className="text-xs bg-[#9a7820] text-white px-2 py-0.5 font-medium tracking-wider">DEVICE</span>
+            <span className="text-xs bg-[#b84a30] text-white px-2 py-0.5 font-medium tracking-wider">STRUCTURAL</span>
+            <span className="text-xs bg-[#2d5fa0] text-white px-2 py-0.5 font-medium tracking-wider">COGNITIVE</span>
+            <span className="text-xs bg-[#2d7a53] text-white px-2 py-0.5 font-medium tracking-wider">SONIC</span>
+            <span className="text-xs bg-[#9a7820] text-white px-2 py-0.5 font-medium tracking-wider">PHYSICAL</span>
           </div>
         </div>
       </div>
@@ -102,21 +102,21 @@ export default function HomePage() {
           <div>
             <div className="text-[#1a1a18] mb-2 font-bold tracking-wider uppercase text-xs">Score</div>
             <div className="text-[#6b6560] leading-relaxed">
-              Chaque carte est notée de 3 à 15. Impact structurel + inconfort du musicien + changement perceptif.
-              Les deux cartes doivent scorer ≥ 8 pour une session valide.
+              Chaque carte est notée de 3 à 15. Structure + désorientation + performance.
+              Les cartes doivent scorer ≥ 8 (sauf STABILISATEUR).
             </div>
           </div>
           <div>
-            <div className="text-[#1a1a18] mb-2 font-bold tracking-wider uppercase text-xs">Liste noire</div>
+            <div className="text-[#1a1a18] mb-2 font-bold tracking-wider uppercase text-xs">Rôles</div>
             <div className="text-[#6b6560] leading-relaxed">
-              NO GRID + NO LEADER sont incompatibles. NO ATTACK + NO SUSTAIN sont incompatibles.
-              Ces paires ne sont jamais générées.
+              Max 1 DESTRUCTEUR par session. Au moins 1 TRANSFORMATIF.
+              Si risque cumulé &gt; 5, un STABILISATEUR est requis.
             </div>
           </div>
           <div>
-            <div className="text-[#1a1a18] mb-2 font-bold tracking-wider uppercase text-xs">Catégories</div>
+            <div className="text-[#1a1a18] mb-2 font-bold tracking-wider uppercase text-xs">Natures</div>
             <div className="text-[#6b6560] leading-relaxed">
-              Deux cartes de la même catégorie ne peuvent pas être associées. Chaque session croise les frontières de catégories.
+              Deux cartes de même nature ne peuvent pas être associées. Chaque session croise les frontières : STRUCTURAL, COGNITIVE, SONIC, PHYSICAL.
             </div>
           </div>
         </div>

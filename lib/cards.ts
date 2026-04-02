@@ -1,531 +1,787 @@
-export type Category = "STRUCTURE" | "ROLE" | "SOUND" | "DEVICE";
-export type Difficulty = 1 | 2 | 3 | 4 | 5;
-export type Tag = "structural" | "cognitive" | "sonic" | "physical";
-export type RiskLevel = "low" | "medium" | "high";
-export type SuitableFor = "solo" | "duo" | "band";
+export type Nature = "STRUCTURAL" | "SONIC" | "COGNITIVE" | "PHYSICAL";
+export type CardRole = "DESTRUCTIVE" | "TRANSFORMATIVE" | "CONSTRAINT" | "STABILIZER";
+export type RiskLevel = 1 | 2 | 3;
 
-export interface Scores {
-  structural_impact: number;
-  performer_discomfort: number;
-  perceptual_change: number;
+export interface Difficulty {
+  structural: number;    // impact on musical form/structure (0–5)
+  disorientation: number; // perceptual disruption for audience/performers (0–5)
+  performance: number;   // execution difficulty for performers (0–5)
 }
 
 export interface Card {
   id: string;
-  category: Category;
+  nature: Nature;
+  role: CardRole;
   title: string;
   description: string;
-  example: string;
+  rules: string[];
   difficulty: Difficulty;
-  tags: Tag[];
-  risk_level: RiskLevel;
-  suitable_for: SuitableFor[];
-  scores: Scores;
+  risk: RiskLevel;
+  incompatibilities: string[];
+  synergies: string[];
 }
 
 export function totalScore(card: Card): number {
-  return (
-    card.scores.structural_impact +
-    card.scores.performer_discomfort +
-    card.scores.perceptual_change
-  );
+  return card.difficulty.structural + card.difficulty.disorientation + card.difficulty.performance;
+}
+
+// Returns 1–5 overall difficulty for display purposes
+export function overallDifficulty(card: Card): number {
+  const avg = (card.difficulty.structural + card.difficulty.disorientation + card.difficulty.performance) / 3;
+  return Math.max(1, Math.min(5, Math.round(avg)));
 }
 
 export const CARDS: Card[] = [
-  // STRUCTURE
+  // ─── STRUCTURAL / DESTRUCTIVE ────────────────────────────────────────
   {
     id: "NO_GRID",
-    category: "STRUCTURE",
+    nature: "STRUCTURAL",
+    role: "DESTRUCTIVE",
     title: "NO GRID",
-    description:
-      "Supprimer toute référence à la grille rythmique. Ni pulsation, ni tempo, ni compte.",
-    example:
-      "Un quartet joue sans batterie ni pied. Personne ne marque le temps. Les entrées flottent.",
-    difficulty: 5,
-    tags: ["structural", "cognitive"],
-    risk_level: "high",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 5, performer_discomfort: 4, perceptual_change: 5 },
-  },
-  {
-    id: "BROKEN_FORM",
-    category: "STRUCTURE",
-    title: "BROKEN FORM",
-    description:
-      "Interrompre la forme naturelle du morceau. Insérer un silence ou une coupure à un point non conventionnel.",
-    example:
-      "Un morceau en couplet-refrain s'arrête net après le premier refrain. Silence de 8 secondes. Reprise au pont.",
-    difficulty: 4,
-    tags: ["structural", "cognitive"],
-    risk_level: "medium",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 5, performer_discomfort: 3, perceptual_change: 4 },
+    description: "Supprimer toute référence à la grille rythmique. Ni pulsation, ni tempo, ni compte.",
+    rules: [
+      "Supprimer toute pulsation et tout tempo de référence avant de commencer",
+      "Aucun marqueur rythmique, aucun compte, aucun signal temporel n'est autorisé",
+      "Chaque entrée flotte librement, les musiciens ne cherchent pas à se synchroniser",
+    ],
+    difficulty: { structural: 5, disorientation: 5, performance: 4 },
+    risk: 3,
+    incompatibilities: ["NO_LEADER", "TEMPO_FRACTURE"],
+    synergies: ["FIXED_REFERENCE", "FIXED_TEMPO", "SILENCE_AS_STRUCTURE"],
   },
   {
     id: "REMOVE_CORE",
-    category: "STRUCTURE",
+    nature: "STRUCTURAL",
+    role: "DESTRUCTIVE",
     title: "REMOVE CORE",
-    description:
-      "Identifier l'élément central du morceau. Le supprimer intégralement.",
-    example:
-      "Un morceau construit sur un riff de basse : la basse disparaît. Ce qui restait en arrière-plan devient la pièce entière.",
-    difficulty: 5,
-    tags: ["structural", "cognitive"],
-    risk_level: "high",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 5, performer_discomfort: 5, perceptual_change: 5 },
-  },
-  {
-    id: "ONE_PASS_FLOW",
-    category: "STRUCTURE",
-    title: "ONE PASS FLOW",
-    description:
-      "Le morceau est joué une seule fois, linéairement. Ni boucles, ni reprises, ni retours.",
-    example:
-      "Un morceau habituellement rejoué deux fois passe en une seule traversée. Le refrain n'est entendu qu'une fois.",
-    difficulty: 3,
-    tags: ["structural"],
-    risk_level: "low",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 4, performer_discomfort: 2, perceptual_change: 3 },
-  },
-  {
-    id: "SILENCE_AS_STRUCTURE",
-    category: "STRUCTURE",
-    title: "SILENCE AS STRUCTURE",
-    description:
-      "Le silence remplace au moins une section structurelle. Ce n'est pas un repos.",
-    example:
-      "Le pont disparaît. À sa place : 15 secondes de silence complet, tenu par tous. La section suivante repart sans préparation.",
-    difficulty: 4,
-    tags: ["structural", "cognitive"],
-    risk_level: "medium",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 5, performer_discomfort: 3, perceptual_change: 4 },
-  },
-
-  // ROLE
-  {
-    id: "ROLE_SWAP",
-    category: "ROLE",
-    title: "ROLE SWAP",
-    description:
-      "Chaque musicien prend le rôle musical d'un autre. La basse joue la mélodie, la mélodie joue le rythme.",
-    example:
-      "Dans un trio guitare-basse-voix : la voix fredonne le riff de basse, la basse suit la ligne vocale, la guitare pulse.",
-    difficulty: 4,
-    tags: ["structural", "cognitive"],
-    risk_level: "medium",
-    suitable_for: ["duo", "band"],
-    scores: { structural_impact: 4, performer_discomfort: 4, perceptual_change: 4 },
-  },
-  {
-    id: "NO_LEADER",
-    category: "ROLE",
-    title: "NO LEADER",
-    description:
-      "Aucun musicien ne peut initier de transitions ni donner de signal. Tout changement doit émerger.",
-    example:
-      "Personne ne lève les yeux pour signaler le refrain. La section change quand tout le monde la ressent — ou pas.",
-    difficulty: 5,
-    tags: ["structural", "cognitive"],
-    risk_level: "high",
-    suitable_for: ["duo", "band"],
-    scores: { structural_impact: 3, performer_discomfort: 5, perceptual_change: 4 },
-  },
-  {
-    id: "VOICE_OFF",
-    category: "ROLE",
-    title: "VOICE OFF",
-    description:
-      "La voix principale ou l'instrument lead joue au niveau ou en dessous du plancher dynamique de l'ensemble.",
-    example:
-      "La voix chante à peine — presque parlé, presque inaudible. L'accompagnement doit descendre encore plus bas pour la laisser exister.",
-    difficulty: 3,
-    tags: ["sonic", "cognitive"],
-    risk_level: "medium",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 2, performer_discomfort: 4, perceptual_change: 4 },
-  },
-  {
-    id: "RHYTHM_MIGRATION",
-    category: "ROLE",
-    title: "RHYTHM MIGRATION",
-    description:
-      "L'ancre rythmique se déplace vers un instrument non-percussif pour toute la durée.",
-    example:
-      "La guitare acoustique pulse en picking régulier. La batterie joue librement, en texture. Le temps vient de là où on ne l'attendait pas.",
-    difficulty: 4,
-    tags: ["structural", "cognitive"],
-    risk_level: "medium",
-    suitable_for: ["duo", "band"],
-    scores: { structural_impact: 4, performer_discomfort: 4, perceptual_change: 4 },
-  },
-  {
-    id: "LIMITED_AGENCY",
-    category: "ROLE",
-    title: "LIMITED AGENCY",
-    description:
-      "Chaque musicien ne peut que réagir, jamais initier. Un seul musicien est exempté.",
-    example:
-      "La voix est la seule à pouvoir ouvrir. Tous les autres attendent qu'elle joue pour entrer — et doivent s'arrêter si elle s'arrête.",
-    difficulty: 4,
-    tags: ["structural", "cognitive"],
-    risk_level: "high",
-    suitable_for: ["duo", "band"],
-    scores: { structural_impact: 3, performer_discomfort: 5, perceptual_change: 3 },
-  },
-
-  // SOUND
-  {
-    id: "LOW_DYNAMIC_ONLY",
-    category: "SOUND",
-    title: "LOW DYNAMIC ONLY",
-    description:
-      "Toute la session reste en pp ou en dessous. Aucun crescendo au-delà de p.",
-    example:
-      "Dans une pièce de 20 personnes assises à moins de 3 mètres, la voix chuchote presque. On entend les doigts sur les cordes.",
-    difficulty: 3,
-    tags: ["sonic"],
-    risk_level: "low",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 2, performer_discomfort: 3, perceptual_change: 4 },
-  },
-  {
-    id: "NO_ATTACK",
-    category: "SOUND",
-    title: "NO ATTACK",
-    description:
-      "Aucune note ne peut commencer par une attaque percussive ou dure. Toutes les entrées doivent être progressives.",
-    example:
-      "La guitare glisse sur la corde sans frapper. La voix entre en fondu depuis le silence. Chaque son naît, il n'arrive pas.",
-    difficulty: 4,
-    tags: ["sonic", "physical"],
-    risk_level: "medium",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 2, performer_discomfort: 4, perceptual_change: 5 },
-  },
-  {
-    id: "REGISTER_LIMIT",
-    category: "SOUND",
-    title: "REGISTER LIMIT",
-    description:
-      "Tous les musiciens sont confinés à une plage d'une seule octave pour toute la session.",
-    example:
-      "Tous jouent entre do3 et do4. La densité harmonique s'écrase. Les voix et instruments se frôlent.",
-    difficulty: 3,
-    tags: ["sonic", "physical"],
-    risk_level: "low",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 3, performer_discomfort: 3, perceptual_change: 4 },
-  },
-  {
-    id: "ACOUSTIC_SHIFT",
-    category: "SOUND",
-    title: "ACOUSTIC SHIFT",
-    description:
-      "Tous les instruments électriques ou amplifiés sont joués acoustiquement ou débranchés.",
-    example:
-      "La guitare électrique débranché résonne faiblement. La basse devient presque inaudible. L'espace de la pièce remplace l'ampli.",
-    difficulty: 4,
-    tags: ["sonic", "physical"],
-    risk_level: "medium",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 3, performer_discomfort: 4, perceptual_change: 5 },
-  },
-  {
-    id: "NO_SUSTAIN",
-    category: "SOUND",
-    title: "NO SUSTAIN",
-    description:
-      "Aucune note ne peut être tenue au-delà de sa décroissance d'attaque. L'articulation est toujours staccato.",
-    example:
-      "Un morceau de ballades lentes joué entièrement en détaché. Les espaces entre les notes deviennent aussi présents que les notes elles-mêmes.",
-    difficulty: 3,
-    tags: ["sonic", "physical"],
-    risk_level: "low",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 2, performer_discomfort: 3, perceptual_change: 4 },
-  },
-
-  // STRUCTURE (suite)
-  {
-    id: "DEPLACEMENT_DE_FORME",
-    category: "STRUCTURE",
-    title: "DÉPLACEMENT DE FORME",
-    description:
-      "Jouer les sections du morceau dans un ordre différent de l'original. La forme devient étrangère à elle-même.",
-    example:
-      "Intro → pont → refrain → couplet. Le morceau existe, mais personne ne le reconnaît immédiatement.",
-    difficulty: 4,
-    tags: ["structural", "cognitive"],
-    risk_level: "medium",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 5, performer_discomfort: 3, perceptual_change: 4 },
+    description: "Identifier l'élément central du morceau. Le supprimer intégralement.",
+    rules: [
+      "Identifier collectivement l'élément central, riff, ligne mélodique, pulsation principale",
+      "Supprimer cet élément intégralement pour toute la durée, aucune allusion, aucun remplacement",
+      "Ce qui subsiste constitue désormais l'intégralité du morceau, continuer sans compenser",
+    ],
+    difficulty: { structural: 5, disorientation: 5, performance: 5 },
+    risk: 3,
+    incompatibilities: ["MISE_A_NU", "REMOVE_HARMONY", "SILENCE_CORE"],
+    synergies: ["FIXED_REFERENCE", "ANCHOR_INSTRUMENT", "CONSTANT_ELEMENT"],
   },
   {
     id: "MISE_A_NU",
-    category: "STRUCTURE",
+    nature: "STRUCTURAL",
+    role: "DESTRUCTIVE",
     title: "MISE À NU",
-    description:
-      "Supprimer tout ce qui habille le morceau. Ne garder que ce qui tient sans soutien.",
-    example:
-      "Pad, doublures, contre-chants, harmonies — tout part. Il reste une voix et un accord gratté. C'est suffisant ou ça ne tient pas.",
-    difficulty: 5,
-    tags: ["structural", "cognitive"],
-    risk_level: "high",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 5, performer_discomfort: 4, perceptual_change: 5 },
+    description: "Supprimer tout ce qui habille le morceau. Ne garder que ce qui tient sans soutien.",
+    rules: [
+      "Supprimer toutes les couches d'habillage, pads, doublures, harmonies, contre-chants",
+      "Ne conserver que ce qui tient sans aucun soutien",
+      "Si la pièce ne tient plus, c'est une information, continuer quand même",
+    ],
+    difficulty: { structural: 5, disorientation: 5, performance: 4 },
+    risk: 3,
+    incompatibilities: ["REMOVE_CORE", "SILENCE_CORE"],
+    synergies: ["FIXED_REFERENCE", "CONSTANT_ELEMENT", "ANCHOR_INSTRUMENT"],
+  },
+  {
+    id: "REMOVE_HARMONY",
+    nature: "STRUCTURAL",
+    role: "DESTRUCTIVE",
+    title: "REMOVE HARMONY",
+    description: "Supprimer toute information harmonique. Le morceau devient purement rythmique ou textural.",
+    rules: [
+      "Supprimer tous les accords et toute tonalité implicite pour toute la durée",
+      "Seules les hauteurs non fonctionnelles, rythmiques ou texturales sont autorisées",
+      "Si une harmonie émerge accidentellement, la briser immédiatement, sans exception",
+    ],
+    difficulty: { structural: 4, disorientation: 5, performance: 3 },
+    risk: 3,
+    incompatibilities: ["REMOVE_CORE"],
+    synergies: ["NO_ATTACK", "SANS_RESONANCE", "REGISTER_LIMIT"],
+  },
+  {
+    id: "SILENCE_CORE",
+    nature: "STRUCTURAL",
+    role: "DESTRUCTIVE",
+    title: "SILENCE CORE",
+    description: "Identifier le moment clé du morceau. Le remplacer par du silence total.",
+    rules: [
+      "Identifier avant de jouer le moment clé, climax, résolution, montée principale",
+      "Tous les musiciens s'arrêtent simultanément à l'entrée de ce moment",
+      "Le silence est tenu pour toute la durée naturelle du moment, puis la pièce repart sans transition",
+    ],
+    difficulty: { structural: 5, disorientation: 4, performance: 3 },
+    risk: 3,
+    incompatibilities: ["MISE_A_NU", "REMOVE_CORE"],
+    synergies: ["SILENCE_AS_STRUCTURE", "BROKEN_FORM"],
+  },
+
+  // ─── STRUCTURAL / TRANSFORMATIVE ────────────────────────────────────
+  {
+    id: "BROKEN_FORM",
+    nature: "STRUCTURAL",
+    role: "TRANSFORMATIVE",
+    title: "BROKEN FORM",
+    description: "Interrompre la forme naturelle du morceau. Insérer une coupure brutale à un point non conventionnel.",
+    rules: [
+      "Identifier avant de jouer un point de rupture non conventionnel dans la forme",
+      "Insérer un silence ou une coupure brutale à ce point, aucune préparation",
+      "La section suivante repart immédiatement, sans transition ni signal",
+    ],
+    difficulty: { structural: 5, disorientation: 4, performance: 3 },
+    risk: 2,
+    incompatibilities: [],
+    synergies: ["SILENCE_AS_STRUCTURE", "DEPLACEMENT_DE_FORME", "SILENCE_CORE"],
+  },
+  {
+    id: "SILENCE_AS_STRUCTURE",
+    nature: "STRUCTURAL",
+    role: "TRANSFORMATIVE",
+    title: "SILENCE AS STRUCTURE",
+    description: "Le silence remplace au moins une section structurelle entière. Ce n'est pas un repos.",
+    rules: [
+      "Identifier une section structurelle entière, refrain, pont, intro",
+      "Remplacer cette section par du silence complet tenu par tous les musiciens",
+      "Le silence est maintenu jusqu'à sa durée naturelle, aucune nervosité, aucun remplacement",
+    ],
+    difficulty: { structural: 5, disorientation: 4, performance: 3 },
+    risk: 2,
+    incompatibilities: [],
+    synergies: ["BROKEN_FORM", "NO_GRID", "SILENCE_CORE"],
+  },
+  {
+    id: "DEPLACEMENT_DE_FORME",
+    nature: "STRUCTURAL",
+    role: "TRANSFORMATIVE",
+    title: "DÉPLACEMENT DE FORME",
+    description: "Jouer les sections du morceau dans un ordre différent de l'original.",
+    rules: [
+      "Décider d'un nouvel ordre pour toutes les sections avant de jouer",
+      "Jouer les sections strictement dans ce nouvel ordre sans s'adapter en cours de route",
+      "Ne pas signaler les changements de section, laisser chacun naviguer seul",
+    ],
+    difficulty: { structural: 5, disorientation: 4, performance: 3 },
+    risk: 2,
+    incompatibilities: [],
+    synergies: ["BROKEN_FORM", "ONE_PASS_FLOW"],
+  },
+  {
+    id: "TEMPO_FRACTURE",
+    nature: "STRUCTURAL",
+    role: "TRANSFORMATIVE",
+    title: "TEMPO FRACTURE",
+    description: "Chaque instrument suit une perception différente du tempo, sans synchronisation possible.",
+    rules: [
+      "Chaque musicien suit son propre tempo interne, défini individuellement avant de jouer",
+      "Aucune synchronisation n'est cherchée ni autorisée pendant la session",
+      "Les décalages qui émergent font partie de la composition, ne pas corriger",
+    ],
+    difficulty: { structural: 4, disorientation: 5, performance: 5 },
+    risk: 3,
+    incompatibilities: ["NO_GRID", "FIXED_TEMPO"],
+    synergies: ["FIXED_REFERENCE", "CONSTANT_ELEMENT"],
+  },
+
+  // ─── STRUCTURAL / CONSTRAINT ─────────────────────────────────────────
+  {
+    id: "ONE_PASS_FLOW",
+    nature: "STRUCTURAL",
+    role: "CONSTRAINT",
+    title: "ONE PASS FLOW",
+    description: "Le morceau est joué une seule fois, linéairement. Ni boucles, ni reprises, ni retours.",
+    rules: [
+      "Le morceau s'exécute une seule fois, en ligne droite",
+      "Aucune section ne se répète, aucun retour arrière n'est autorisé",
+      "La fin arrive quand la forme est épuisée, même si ce n'est qu'une seule traversée",
+    ],
+    difficulty: { structural: 4, disorientation: 3, performance: 2 },
+    risk: 1,
+    incompatibilities: [],
+    synergies: ["BROKEN_FORM", "DEPLACEMENT_DE_FORME"],
   },
   {
     id: "UN_SEUL_GESTE",
-    category: "STRUCTURE",
+    nature: "STRUCTURAL",
+    role: "CONSTRAINT",
     title: "UN SEUL GESTE",
-    description:
-      "Chaque musicien réduit son jeu à un seul geste récurrent, tenu pour toute la durée de la session.",
-    example:
-      "La guitare ne fait que gratter une corde à vide. La basse tient une pédale. Le chant reste sur deux notes. Le morceau tient sur ce peu.",
-    difficulty: 4,
-    tags: ["structural", "cognitive", "physical"],
-    risk_level: "high",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 4, performer_discomfort: 4, perceptual_change: 4 },
+    description: "Chaque musicien réduit son jeu à un seul geste récurrent, tenu pour toute la durée.",
+    rules: [
+      "Choisir un seul geste instrumental avant de jouer, une note, un riff, un accord, un battement",
+      "Ce geste ne peut pas être modifié ou remplacé pour toute la durée de la session",
+      "Toute l'expression passe par la variation de ce seul geste : dynamique, timing, intention",
+    ],
+    difficulty: { structural: 4, disorientation: 4, performance: 4 },
+    risk: 3,
+    incompatibilities: ["LIMITED_AGENCY"],
+    synergies: ["ONE_PASS_FLOW", "REGISTER_LIMIT"],
   },
 
-  // ROLE (suite)
+  // ─── STRUCTURAL / STABILIZER ─────────────────────────────────────────
+  {
+    id: "FIXED_REFERENCE",
+    nature: "STRUCTURAL",
+    role: "STABILIZER",
+    title: "FIXED REFERENCE",
+    description: "Un seul élément du morceau est désigné intouchable. Il ne change pas, quoi qu'il arrive.",
+    rules: [
+      "Désigner avant de jouer un seul élément qui ne changera pas, une note, un accord, un tempo",
+      "Cet élément est joué ou tenu identiquement du début à la fin",
+      "Toutes les autres contraintes s'appliquent autour de lui, lui seul est protégé",
+    ],
+    difficulty: { structural: 3, disorientation: 3, performance: 2 },
+    risk: 1,
+    incompatibilities: [],
+    synergies: ["REMOVE_CORE", "MISE_A_NU", "NO_GRID", "TEMPO_FRACTURE"],
+  },
+  {
+    id: "FIXED_TEMPO",
+    nature: "STRUCTURAL",
+    role: "STABILIZER",
+    title: "FIXED TEMPO",
+    description: "Le tempo global reste strictement identique du début à la fin.",
+    rules: [
+      "Définir un tempo précis avant de commencer et le nommer clairement",
+      "Ce tempo ne peut jamais varier, ni accélérer, ni ralentir",
+      "Si l'ensemble dérive, rester sur le tempo défini, ne pas suivre les autres",
+    ],
+    difficulty: { structural: 3, disorientation: 2, performance: 3 },
+    risk: 1,
+    incompatibilities: ["NO_GRID", "TEMPO_FRACTURE"],
+    synergies: ["NO_LEADER", "REMOVE_CORE", "MISE_A_NU"],
+  },
+  {
+    id: "ANCHOR_INSTRUMENT",
+    nature: "STRUCTURAL",
+    role: "STABILIZER",
+    title: "ANCHOR INSTRUMENT",
+    description: "Un instrument garde son rôle traditionnel sans aucune déviation.",
+    rules: [
+      "Désigner un instrument avant de commencer, celui qui garde son rôle habituel",
+      "Cet instrument joue normalement pour toute la session, aucune déviation autorisée",
+      "Tous les autres musiciens peuvent dériver, lui seul reste le point de référence fixe",
+    ],
+    difficulty: { structural: 3, disorientation: 2, performance: 3 },
+    risk: 1,
+    incompatibilities: ["EFFECTIF_REDUIT"],
+    synergies: ["REMOVE_CORE", "NO_LEADER", "ROLE_SWAP", "TEMPO_FRACTURE"],
+  },
+
+  // ─── COGNITIVE / DESTRUCTIVE ─────────────────────────────────────────
+  {
+    id: "NO_LEADER",
+    nature: "COGNITIVE",
+    role: "DESTRUCTIVE",
+    title: "NO LEADER",
+    description: "Aucun musicien ne peut initier de transitions ni donner de signal. Tout changement doit émerger.",
+    rules: [
+      "Aucun musicien ne peut initier un changement de section ni donner de signal",
+      "Les transitions doivent émerger sans coordination explicite, regard, geste ou signe interdits",
+      "Si personne ne bouge, le morceau reste où il est, c'est une issue valide",
+    ],
+    difficulty: { structural: 3, disorientation: 4, performance: 5 },
+    risk: 3,
+    incompatibilities: ["NO_GRID"],
+    synergies: ["ANCHOR_INSTRUMENT", "FIXED_TEMPO", "CONSTANT_ELEMENT"],
+  },
   {
     id: "EFFECTIF_REDUIT",
-    category: "ROLE",
+    nature: "COGNITIVE",
+    role: "DESTRUCTIVE",
     title: "EFFECTIF RÉDUIT",
-    description:
-      "Réduire l'effectif d'au moins un musicien par rapport à la formation habituelle. La formation ne peut pas s'assembler complètement.",
-    example:
-      "Un groupe de cinq joue à trois. Ce qui manque s'entend — et ce qui reste prend plus de place.",
-    difficulty: 4,
-    tags: ["structural", "cognitive"],
-    risk_level: "medium",
-    suitable_for: ["duo", "band"],
-    scores: { structural_impact: 4, performer_discomfort: 3, perceptual_change: 4 },
+    description: "Retirer au moins un musicien. La formation ne peut pas s'assembler complètement.",
+    rules: [
+      "Retirer au moins un musicien de la formation habituelle avant de commencer",
+      "La formation réduite ne peut pas simuler ni compenser les parties manquantes",
+      "Ce qui manque doit s'entendre, ne pas combler les vides",
+    ],
+    difficulty: { structural: 4, disorientation: 3, performance: 3 },
+    risk: 2,
+    incompatibilities: ["ANCHOR_INSTRUMENT"],
+    synergies: [],
+  },
+
+  // ─── COGNITIVE / TRANSFORMATIVE ──────────────────────────────────────
+  {
+    id: "ROLE_SWAP",
+    nature: "COGNITIVE",
+    role: "TRANSFORMATIVE",
+    title: "ROLE SWAP",
+    description: "Chaque musicien prend le rôle musical d'un autre. La basse joue la mélodie, la mélodie joue le rythme.",
+    rules: [
+      "Désigner le rôle musical de chaque autre musicien avant de jouer",
+      "Chaque joueur adopte le rôle assigné strictement, la basse joue la mélodie, la mélodie pulse",
+      "Aucun retour au rôle habituel, même si la texture s'effondre",
+    ],
+    difficulty: { structural: 4, disorientation: 4, performance: 4 },
+    risk: 2,
+    incompatibilities: [],
+    synergies: ["RHYTHM_MIGRATION", "INVERSION_DE_PLAN", "ROLE_INVERSION"],
+  },
+  {
+    id: "RHYTHM_MIGRATION",
+    nature: "COGNITIVE",
+    role: "TRANSFORMATIVE",
+    title: "RHYTHM MIGRATION",
+    description: "L'ancre rythmique se déplace vers un instrument non-percussif pour toute la durée.",
+    rules: [
+      "Désigner un instrument non-percussif comme ancre rythmique avant de jouer",
+      "Cet instrument pulse régulièrement et ne peut pas s'en libérer",
+      "La batterie ou l'instrument habituellement rythmique joue librement en texture",
+    ],
+    difficulty: { structural: 4, disorientation: 4, performance: 4 },
+    risk: 2,
+    incompatibilities: [],
+    synergies: ["ROLE_SWAP", "NO_GRID", "INVERSION_DE_PLAN"],
   },
   {
     id: "INVERSION_DE_PLAN",
-    category: "ROLE",
+    nature: "COGNITIVE",
+    role: "TRANSFORMATIVE",
     title: "INVERSION DE PLAN",
-    description:
-      "L'instrument de fond passe au premier plan. L'instrument soliste disparaît en arrière-plan.",
-    example:
-      "La basse joue seule au centre. La guitare solo se noie dans un jeu de texture, presque inaudible.",
-    difficulty: 3,
-    tags: ["structural", "cognitive"],
-    risk_level: "medium",
-    suitable_for: ["duo", "band"],
-    scores: { structural_impact: 3, performer_discomfort: 4, perceptual_change: 4 },
+    description: "L'instrument de fond passe au premier plan. L'instrument soliste disparaît en arrière-plan.",
+    rules: [
+      "L'instrument de fond prend le premier plan sonique dès le début",
+      "L'instrument soliste se noie dans la texture, le plus bas possible",
+      "L'inversion doit être perceptible dès la première mesure, pas progressive",
+    ],
+    difficulty: { structural: 3, disorientation: 4, performance: 4 },
+    risk: 2,
+    incompatibilities: [],
+    synergies: ["ROLE_SWAP", "RHYTHM_MIGRATION", "ROLE_INVERSION"],
+  },
+  {
+    id: "ROLE_INVERSION",
+    nature: "COGNITIVE",
+    role: "TRANSFORMATIVE",
+    title: "ROLE INVERSION",
+    description: "Chaque musicien adopte le rôle d'un autre instrument pour toute la durée.",
+    rules: [
+      "Assigner avant de jouer un instrument cible à chaque musicien",
+      "Chaque musicien joue comme s'il était cet instrument, timbre, dynamique, phrasé",
+      "Les rôles sont fixes pour toute la session, aucun échange en cours de jeu",
+    ],
+    difficulty: { structural: 3, disorientation: 4, performance: 4 },
+    risk: 2,
+    incompatibilities: [],
+    synergies: ["ROLE_SWAP", "INVERSION_DE_PLAN", "RHYTHM_MIGRATION"],
+  },
+
+  // ─── COGNITIVE / CONSTRAINT ──────────────────────────────────────────
+  {
+    id: "VOICE_OFF",
+    nature: "COGNITIVE",
+    role: "CONSTRAINT",
+    title: "VOICE OFF",
+    description: "La voix principale ou l'instrument lead joue au niveau ou en dessous du plancher dynamique de l'ensemble.",
+    rules: [
+      "La voix principale ou l'instrument lead joue au niveau ou en dessous du plancher dynamique",
+      "Les autres instruments ne peuvent pas descendre en dessous de ce plancher",
+      "Si la voix devient inaudible, c'est la contrainte, ne pas compenser",
+    ],
+    difficulty: { structural: 2, disorientation: 4, performance: 4 },
+    risk: 2,
+    incompatibilities: [],
+    synergies: ["LOW_DYNAMIC_ONLY", "DYNAMIC_CEILING"],
+  },
+  {
+    id: "LIMITED_AGENCY",
+    nature: "COGNITIVE",
+    role: "CONSTRAINT",
+    title: "LIMITED AGENCY",
+    description: "Chaque musicien ne peut que réagir, jamais initier. Un seul musicien est exempté.",
+    rules: [
+      "Désigner un seul musicien qui peut initier librement",
+      "Tous les autres ne peuvent que réagir, aucune initiative propre",
+      "Si l'initiateur s'arrête, tous s'arrêtent dans les 3 secondes",
+    ],
+    difficulty: { structural: 3, disorientation: 3, performance: 5 },
+    risk: 3,
+    incompatibilities: ["UN_SEUL_GESTE"],
+    synergies: ["SANS_INITIATIVE"],
   },
   {
     id: "SANS_INITIATIVE",
-    category: "ROLE",
+    nature: "COGNITIVE",
+    role: "CONSTRAINT",
     title: "SANS INITIATIVE",
-    description:
-      "Un musicien désigné ne joue que si un autre a joué avant lui dans les 5 dernières secondes. Il ne peut jamais ouvrir.",
-    example:
-      "Le pianiste attend. La voix pose une note. Le piano répond. Si la voix se tait trop longtemps, le piano se tait aussi.",
-    difficulty: 4,
-    tags: ["structural", "cognitive"],
-    risk_level: "high",
-    suitable_for: ["duo", "band"],
-    scores: { structural_impact: 3, performer_discomfort: 5, perceptual_change: 3 },
+    description: "Un musicien désigné ne joue que si un autre a joué avant lui dans les 5 dernières secondes.",
+    rules: [
+      "Désigner un musicien qui ne peut jamais jouer en premier",
+      "Ce musicien ne peut jouer que si quelqu'un d'autre a joué dans les 5 dernières secondes",
+      "Si l'ensemble se tait plus de 5 secondes, ce musicien attend qu'un autre reprenne",
+    ],
+    difficulty: { structural: 3, disorientation: 3, performance: 5 },
+    risk: 3,
+    incompatibilities: [],
+    synergies: ["LIMITED_AGENCY"],
   },
 
-  // SOUND (suite)
+  // ─── COGNITIVE / STABILIZER ──────────────────────────────────────────
   {
-    id: "OBJETS_DU_LIEU",
-    category: "SOUND",
-    title: "OBJETS DU LIEU",
-    description:
-      "Au moins un instrument est remplacé par un objet sonore trouvé dans l'espace de jeu. L'acoustique du lieu entre dans le morceau.",
-    example:
-      "Dans un atelier : une planche de bois frappée remplace la caisse claire. Un verre d'eau posé sur la table sert de résonateur.",
-    difficulty: 4,
-    tags: ["sonic", "physical", "cognitive"],
-    risk_level: "medium",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 3, performer_discomfort: 4, perceptual_change: 5 },
+    id: "CONSTANT_ELEMENT",
+    nature: "COGNITIVE",
+    role: "STABILIZER",
+    title: "CONSTANT ELEMENT",
+    description: "Un motif musical précis reste strictement identique du début à la fin.",
+    rules: [
+      "Choisir un motif musical précis avant de jouer, une phrase, un accord, un rythme",
+      "Ce motif est joué ou répété identiquement par un musicien du début à la fin",
+      "Les autres contraintes s'appliquent autour, le motif ne change jamais",
+    ],
+    difficulty: { structural: 3, disorientation: 2, performance: 3 },
+    risk: 1,
+    incompatibilities: [],
+    synergies: ["MISE_A_NU", "REMOVE_CORE", "NO_GRID", "TEMPO_FRACTURE"],
+  },
+
+  // ─── SONIC / DESTRUCTIVE ─────────────────────────────────────────────
+  // (none, sonic destruction tends to be transformative)
+
+  // ─── SONIC / TRANSFORMATIVE ──────────────────────────────────────────
+  {
+    id: "ACOUSTIC_SHIFT",
+    nature: "SONIC",
+    role: "TRANSFORMATIVE",
+    title: "ACOUSTIC SHIFT",
+    description: "Tous les instruments électriques ou amplifiés jouent acoustiquement ou débranchés.",
+    rules: [
+      "Tous les instruments électriques ou amplifiés jouent débranchés ou acoustiquement",
+      "L'amplification est éteinte pour toute la durée, aucun retour possible",
+      "Si l'instrument est inaudible sans amplification, le jouer quand même, c'est la contrainte",
+    ],
+    difficulty: { structural: 3, disorientation: 5, performance: 4 },
+    risk: 2,
+    incompatibilities: [],
+    synergies: ["OBJETS_DU_LIEU", "INSTRUMENT_DEPLACE", "SANS_RESONANCE"],
   },
   {
-    id: "SANS_RESONANCE",
-    category: "SOUND",
-    title: "SANS RÉSONANCE",
-    description:
-      "Toute résonance artificielle est supprimée — reverb, delay, pédale de sustain. Le son s'arrête avec le geste.",
-    example:
-      "Une voix habituellement noyée dans la reverb chante dans le sec total. Chaque intention, chaque hésitation s'entend.",
-    difficulty: 3,
-    tags: ["sonic", "physical"],
-    risk_level: "low",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 2, performer_discomfort: 3, perceptual_change: 4 },
+    id: "OBJETS_DU_LIEU",
+    nature: "SONIC",
+    role: "TRANSFORMATIVE",
+    title: "OBJETS DU LIEU",
+    description: "Au moins un instrument est remplacé par un objet sonore trouvé dans l'espace de jeu.",
+    rules: [
+      "Identifier avant le début deux objets présents dans le lieu, bois, métal, tissu, verre",
+      "Au moins un instrument traditionnel est remplacé par ces objets trouvés",
+      "Les objets ne peuvent pas être modifiés, jouer avec ce qu'ils offrent nativement",
+    ],
+    difficulty: { structural: 3, disorientation: 5, performance: 4 },
+    risk: 2,
+    incompatibilities: [],
+    synergies: ["ACOUSTIC_SHIFT", "INSTRUMENT_DEPLACE"],
   },
   {
     id: "INSTRUMENT_DEPLACE",
-    category: "SOUND",
+    nature: "SONIC",
+    role: "TRANSFORMATIVE",
     title: "INSTRUMENT DÉPLACÉ",
-    description:
-      "Chaque musicien joue son instrument d'une façon non conventionnelle — préparation, placement, technique étendue.",
-    example:
-      "La guitare est posée à plat, jouée avec un archet. La basse est frappée avec les paumes. Les sonorités deviennent méconnaissables.",
-    difficulty: 4,
-    tags: ["sonic", "physical", "cognitive"],
-    risk_level: "medium",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 3, performer_discomfort: 5, perceptual_change: 4 },
+    description: "Chaque musicien joue son instrument d'une façon non conventionnelle, préparation, placement, technique étendue.",
+    rules: [
+      "Chaque musicien adopte une technique étendue ou non conventionnelle pour son instrument",
+      "Les techniques habituelles de jeu sont interdites pour toute la durée",
+      "Si aucune technique étendue n'est connue, en inventer une sur le moment",
+    ],
+    difficulty: { structural: 3, disorientation: 4, performance: 5 },
+    risk: 2,
+    incompatibilities: [],
+    synergies: ["ACOUSTIC_SHIFT", "OBJETS_DU_LIEU"],
   },
 
-  // DEVICE
+  // ─── SONIC / CONSTRAINT ──────────────────────────────────────────────
   {
-    id: "CIRCLE_MODE",
-    category: "DEVICE",
-    title: "CIRCLE MODE",
-    description:
-      "Les musiciens sont disposés en cercle face vers l'extérieur. Aucun contact visuel entre eux.",
-    example:
-      "Un trio en cercle dos tourné vers le centre. Chacun joue vers un coin de la pièce. L'écoute remplace le regard.",
-    difficulty: 3,
-    tags: ["physical", "cognitive"],
-    risk_level: "low",
-    suitable_for: ["duo", "band"],
-    scores: { structural_impact: 2, performer_discomfort: 4, perceptual_change: 3 },
+    id: "LOW_DYNAMIC_ONLY",
+    nature: "SONIC",
+    role: "CONSTRAINT",
+    title: "LOW DYNAMIC ONLY",
+    description: "Toute la session reste en pianissimo ou en dessous. Aucun crescendo au-delà de piano.",
+    rules: [
+      "Toute la session reste en pianissimo ou en dessous",
+      "Aucun crescendo ne peut dépasser piano",
+      "Si un instrument monte naturellement, le ramener immédiatement, sans transition",
+    ],
+    difficulty: { structural: 2, disorientation: 4, performance: 3 },
+    risk: 1,
+    incompatibilities: [],
+    synergies: ["VOICE_OFF", "NO_ATTACK", "DYNAMIC_CEILING"],
   },
+  {
+    id: "NO_ATTACK",
+    nature: "SONIC",
+    role: "CONSTRAINT",
+    title: "NO ATTACK",
+    description: "Aucune note ne peut commencer par une attaque percussive. Toutes les entrées sont progressives.",
+    rules: [
+      "Aucune note ne peut commencer par une attaque perceptible",
+      "Toutes les entrées sont des fondus depuis le silence, glissando, doigté progressif, archet posé",
+      "Si une attaque est inévitable sur l'instrument, l'estomper immédiatement",
+    ],
+    difficulty: { structural: 2, disorientation: 5, performance: 4 },
+    risk: 2,
+    incompatibilities: ["NO_SUSTAIN"],
+    synergies: ["LOW_DYNAMIC_ONLY", "SANS_RESONANCE", "DYNAMIC_CEILING"],
+  },
+  {
+    id: "REGISTER_LIMIT",
+    nature: "SONIC",
+    role: "CONSTRAINT",
+    title: "REGISTER LIMIT",
+    description: "Tous les musiciens sont confinés à une plage d'une seule octave pour toute la session.",
+    rules: [
+      "Définir collectivement une plage d'une octave avant de jouer",
+      "Aucune note en dehors de cette plage, même pour une transition",
+      "La plage commune est décidée avant le début, aucun ajustement en cours de session",
+    ],
+    difficulty: { structural: 3, disorientation: 4, performance: 3 },
+    risk: 1,
+    incompatibilities: [],
+    synergies: ["LOW_DYNAMIC_ONLY", "REMOVE_HARMONY", "LIMITED_RANGE"],
+  },
+  {
+    id: "NO_SUSTAIN",
+    nature: "SONIC",
+    role: "CONSTRAINT",
+    title: "NO SUSTAIN",
+    description: "Aucune note ne peut être tenue au-delà de sa décroissance d'attaque. Articulation toujours staccato.",
+    rules: [
+      "Aucune note ne peut être tenue au-delà de sa décroissance naturelle",
+      "Toute articulation est en staccato ou détaché strict",
+      "Les pédales de sustain, les loops et les drones sont interdits",
+    ],
+    difficulty: { structural: 2, disorientation: 4, performance: 3 },
+    risk: 1,
+    incompatibilities: ["NO_ATTACK"],
+    synergies: [],
+  },
+  {
+    id: "SANS_RESONANCE",
+    nature: "SONIC",
+    role: "CONSTRAINT",
+    title: "SANS RÉSONANCE",
+    description: "Toute résonance artificielle est supprimée. Le son s'arrête avec le geste.",
+    rules: [
+      "Toute résonance artificielle est supprimée, reverb, delay, écho, chorus",
+      "La pédale de sustain est interdite",
+      "Le son s'arrête strictement avec le geste qui l'a produit",
+    ],
+    difficulty: { structural: 2, disorientation: 4, performance: 3 },
+    risk: 1,
+    incompatibilities: [],
+    synergies: ["NO_ATTACK", "ACOUSTIC_SHIFT"],
+  },
+  {
+    id: "DYNAMIC_CEILING",
+    nature: "SONIC",
+    role: "CONSTRAINT",
+    title: "DYNAMIC CEILING",
+    description: "Un plafond de volume est défini collectivement. Dès qu'un instrument dépasse, l'ensemble entier doit descendre.",
+    rules: [
+      "Définir collectivement un niveau de volume maximum avant de jouer",
+      "Aucun instrument ne peut dépasser ce plafond, jamais, même pour un accent",
+      "Si un musicien dépasse le plafond, tout l'ensemble descend immédiatement en dessous",
+    ],
+    difficulty: { structural: 2, disorientation: 4, performance: 3 },
+    risk: 1,
+    incompatibilities: [],
+    synergies: ["LOW_DYNAMIC_ONLY", "NO_ATTACK", "VOICE_OFF"],
+  },
+
+  // ─── PHYSICAL / DESTRUCTIVE ──────────────────────────────────────────
   {
     id: "NO_MONITOR",
-    category: "DEVICE",
+    nature: "PHYSICAL",
+    role: "DESTRUCTIVE",
     title: "NO MONITOR",
-    description:
-      "Tout monitoring de scène est supprimé. Les musiciens n'entendent que le son de la salle.",
-    example:
-      "Dans une salle communale : les retours sont éteints. La balance change complètement. Les musiciens s'entendent comme le public les entend.",
-    difficulty: 4,
-    tags: ["sonic", "physical"],
-    risk_level: "high",
-    suitable_for: ["duo", "band"],
-    scores: { structural_impact: 2, performer_discomfort: 5, perceptual_change: 4 },
+    description: "Tout monitoring de scène est supprimé. Les musiciens n'entendent que le son de la salle.",
+    rules: [
+      "Tous les retours de scène sont éteints avant de commencer",
+      "Les musiciens entendent uniquement ce que la salle renvoie",
+      "Aucun ajustement de monitoring n'est autorisé pendant la session",
+    ],
+    difficulty: { structural: 2, disorientation: 3, performance: 5 },
+    risk: 3,
+    incompatibilities: [],
+    synergies: [],
   },
-  {
-    id: "DISTANCE_CONSTRAINT",
-    category: "DEVICE",
-    title: "DISTANCE CONSTRAINT",
-    description:
-      "Les musiciens sont physiquement séparés. Minimum 5 mètres entre chaque musicien.",
-    example:
-      "Guitariste à une extrémité de l'atelier, voix à l'autre. Le public est entre eux. Le son voyage dans l'espace.",
-    difficulty: 3,
-    tags: ["physical", "cognitive"],
-    risk_level: "medium",
-    suitable_for: ["duo", "band"],
-    scores: { structural_impact: 2, performer_discomfort: 4, perceptual_change: 4 },
-  },
-  {
-    id: "BACK_TO_BACK",
-    category: "DEVICE",
-    title: "BACK TO BACK",
-    description:
-      "Les musiciens se tiennent dos à dos. Aucun signal visuel autorisé.",
-    example:
-      "Un duo voix-guitare dos à dos. Ni regard, ni hochement de tête. Seul le son circule.",
-    difficulty: 3,
-    tags: ["physical", "cognitive"],
-    risk_level: "low",
-    suitable_for: ["duo", "band"],
-    scores: { structural_impact: 2, performer_discomfort: 3, perceptual_change: 3 },
-  },
+
+  // ─── PHYSICAL / TRANSFORMATIVE ───────────────────────────────────────
   {
     id: "AUDIENCE_BLEED",
-    category: "DEVICE",
+    nature: "PHYSICAL",
+    role: "TRANSFORMATIVE",
     title: "AUDIENCE BLEED",
-    description:
-      "Le public est placé dans l'espace de jeu. Aucune séparation scène/salle.",
-    example:
-      "Les auditeurs sont assis entre les musiciens. La respiration du public, ses mouvements, entrent dans l'acoustique du morceau.",
-    difficulty: 4,
-    tags: ["physical", "cognitive"],
-    risk_level: "high",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 3, performer_discomfort: 4, perceptual_change: 5 },
-  },
-  {
-    id: "LUMIERE_NATURELLE",
-    category: "DEVICE",
-    title: "LUMIÈRE NATURELLE",
-    description:
-      "La session se joue avec la seule lumière du lieu — naturelle ou ambiante. Aucun éclairage de scène ni artificiel.",
-    example:
-      "Session en fin d'après-midi dans un atelier. La lumière baisse au fil des morceaux. La dernière pièce se joue presque dans le noir.",
-    difficulty: 2,
-    tags: ["physical", "cognitive"],
-    risk_level: "low",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 2, performer_discomfort: 3, perceptual_change: 4 },
+    description: "Le public est placé dans l'espace de jeu. Aucune séparation scène/salle.",
+    rules: [
+      "Le public est placé dans l'espace de jeu, aucune séparation scène/salle",
+      "Les musiciens jouent autour et entre les auditeurs",
+      "La respiration, les mouvements et les sons du public font partie du morceau",
+    ],
+    difficulty: { structural: 3, disorientation: 5, performance: 4 },
+    risk: 3,
+    incompatibilities: ["PUBLIC_DISPERSE"],
+    synergies: [],
   },
   {
     id: "PUBLIC_DISPERSE",
-    category: "DEVICE",
+    nature: "PHYSICAL",
+    role: "TRANSFORMATIVE",
     title: "PUBLIC DISPERSÉ",
-    description:
-      "Le public est réparti dans l'espace, sans regroupement. Les musiciens jouent entre les personnes présentes.",
-    example:
-      "20 personnes réparties dans une grande pièce, certaines debout, d'autres assises au sol. Les musiciens se déplacent lentement entre eux.",
-    difficulty: 4,
-    tags: ["physical", "cognitive"],
-    risk_level: "high",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 3, performer_discomfort: 4, perceptual_change: 5 },
+    description: "Le public est réparti dans l'espace sans regroupement. Les musiciens jouent entre les personnes.",
+    rules: [
+      "Le public est réparti dans l'espace sans regroupement imposé",
+      "Les musiciens jouent entre les personnes présentes, en mouvement",
+      "La relation son/espace devient la performance, pas la scène",
+    ],
+    difficulty: { structural: 3, disorientation: 5, performance: 4 },
+    risk: 3,
+    incompatibilities: ["AUDIENCE_BLEED"],
+    synergies: [],
+  },
+
+  // ─── PHYSICAL / CONSTRAINT ───────────────────────────────────────────
+  {
+    id: "CIRCLE_MODE",
+    nature: "PHYSICAL",
+    role: "CONSTRAINT",
+    title: "CIRCLE MODE",
+    description: "Les musiciens en cercle face vers l'extérieur. Aucun contact visuel entre eux.",
+    rules: [
+      "Les musiciens se placent en cercle face vers l'extérieur",
+      "Aucun contact visuel entre musiciens n'est autorisé",
+      "Les transitions et signaux se font uniquement par écoute",
+    ],
+    difficulty: { structural: 2, disorientation: 3, performance: 4 },
+    risk: 1,
+    incompatibilities: [],
+    synergies: ["BACK_TO_BACK", "DISTANCE_CONSTRAINT"],
+  },
+  {
+    id: "DISTANCE_CONSTRAINT",
+    nature: "PHYSICAL",
+    role: "CONSTRAINT",
+    title: "DISTANCE CONSTRAINT",
+    description: "Les musiciens sont physiquement séparés. Minimum 5 mètres entre chaque musicien.",
+    rules: [
+      "Les musiciens se placent avec un minimum de 5 mètres entre chacun",
+      "Cette distance est maintenue pour toute la session",
+      "La communication ne passe que par le son, aucun signal visuel ou gestuel",
+    ],
+    difficulty: { structural: 2, disorientation: 4, performance: 4 },
+    risk: 2,
+    incompatibilities: [],
+    synergies: ["CIRCLE_MODE"],
+  },
+  {
+    id: "BACK_TO_BACK",
+    nature: "PHYSICAL",
+    role: "CONSTRAINT",
+    title: "BACK TO BACK",
+    description: "Les musiciens se tiennent dos à dos. Aucun signal visuel autorisé.",
+    rules: [
+      "Les musiciens se placent dos à dos",
+      "Aucun signal visuel ou gestuel n'est autorisé",
+      "Seul le son circule, l'écoute est l'unique canal de communication",
+    ],
+    difficulty: { structural: 2, disorientation: 3, performance: 3 },
+    risk: 1,
+    incompatibilities: [],
+    synergies: ["CIRCLE_MODE", "NO_MONITOR"],
+  },
+  {
+    id: "LUMIERE_NATURELLE",
+    nature: "PHYSICAL",
+    role: "CONSTRAINT",
+    title: "LUMIÈRE NATURELLE",
+    description: "La session se joue avec la seule lumière du lieu. Aucun éclairage artificiel.",
+    rules: [
+      "Aucun éclairage artificiel ni de scène n'est utilisé",
+      "Seule la lumière ambiante du lieu est présente",
+      "La session se déroule dans ces conditions jusqu'à la fin, même si la visibilité baisse",
+    ],
+    difficulty: { structural: 2, disorientation: 4, performance: 3 },
+    risk: 1,
+    incompatibilities: [],
+    synergies: [],
   },
   {
     id: "CAPTATION_ASSUMEE",
-    category: "DEVICE",
+    nature: "PHYSICAL",
+    role: "CONSTRAINT",
     title: "CAPTATION ASSUMÉE",
-    description:
-      "Les micros et caméras sont visibles, exposés, intégrés au dispositif. Le tournage fait partie du jeu.",
-    example:
-      "Les perches et micros de sol sont laissés à vue. Un musicien joue directement face à une caméra fixe. La trace est présente dès le début.",
-    difficulty: 2,
-    tags: ["physical", "cognitive"],
-    risk_level: "low",
-    suitable_for: ["solo", "duo", "band"],
-    scores: { structural_impact: 2, performer_discomfort: 3, perceptual_change: 3 },
+    description: "Les micros et caméras sont visibles, exposés, intégrés au dispositif.",
+    rules: [
+      "Les micros et caméras de captation sont visibles et exposés dans l'espace",
+      "Les musiciens jouent avec conscience des dispositifs de captation",
+      "La trace est présente dès le début, non dissimulée, non oubliée",
+    ],
+    difficulty: { structural: 2, disorientation: 3, performance: 3 },
+    risk: 1,
+    incompatibilities: [],
+    synergies: [],
+  },
+  {
+    id: "LIMITED_RANGE",
+    nature: "PHYSICAL",
+    role: "CONSTRAINT",
+    title: "LIMITED RANGE",
+    description: "Chaque musicien limite son instrument à exactement 5 notes choisies avant de commencer.",
+    rules: [
+      "Chaque musicien choisit exactement 5 notes avant de jouer",
+      "Ces 5 notes ne peuvent pas être changées en cours de session",
+      "Toute la durée de la pièce se construit sur ces seules 5 notes par instrument",
+    ],
+    difficulty: { structural: 3, disorientation: 4, performance: 4 },
+    risk: 1,
+    incompatibilities: [],
+    synergies: ["REGISTER_LIMIT", "UN_SEUL_GESTE"],
   },
 ];
 
-export const CATEGORY_COLORS: Record<Category, string> = {
-  STRUCTURE: "#b84a30",
-  ROLE: "#2d5fa0",
-  SOUND: "#2d7a53",
-  DEVICE: "#9a7820",
+// ─── Appearance maps (keyed by Nature) ──────────────────────────────────────
+
+export const NATURE_COLORS: Record<Nature, string> = {
+  STRUCTURAL: "#b84a30",
+  COGNITIVE:  "#2d5fa0",
+  SONIC:      "#2d7a53",
+  PHYSICAL:   "#9a7820",
 };
 
-export const CATEGORY_BG: Record<Category, string> = {
-  STRUCTURE: "bg-[#b84a30]",
-  ROLE: "bg-[#2d5fa0]",
-  SOUND: "bg-[#2d7a53]",
-  DEVICE: "bg-[#9a7820]",
+export const NATURE_BG: Record<Nature, string> = {
+  STRUCTURAL: "bg-[#b84a30]",
+  COGNITIVE:  "bg-[#2d5fa0]",
+  SONIC:      "bg-[#2d7a53]",
+  PHYSICAL:   "bg-[#9a7820]",
 };
 
-export const CATEGORY_BORDER: Record<Category, string> = {
-  STRUCTURE: "border-[#b84a30]",
-  ROLE: "border-[#2d5fa0]",
-  SOUND: "border-[#2d7a53]",
-  DEVICE: "border-[#9a7820]",
+export const NATURE_BORDER: Record<Nature, string> = {
+  STRUCTURAL: "border-[#b84a30]",
+  COGNITIVE:  "border-[#2d5fa0]",
+  SONIC:      "border-[#2d7a53]",
+  PHYSICAL:   "border-[#9a7820]",
 };
 
-export const CATEGORY_TEXT: Record<Category, string> = {
-  STRUCTURE: "text-[#b84a30]",
-  ROLE: "text-[#2d5fa0]",
-  SOUND: "text-[#2d7a53]",
-  DEVICE: "text-[#9a7820]",
+export const NATURE_TEXT: Record<Nature, string> = {
+  STRUCTURAL: "text-[#b84a30]",
+  COGNITIVE:  "text-[#2d5fa0]",
+  SONIC:      "text-[#2d7a53]",
+  PHYSICAL:   "text-[#9a7820]",
 };
 
-export const CATEGORY_DOT: Record<Category, string> = {
-  STRUCTURE: "bg-[#b84a30]",
-  ROLE: "bg-[#2d5fa0]",
-  SOUND: "bg-[#2d7a53]",
-  DEVICE: "bg-[#9a7820]",
+export const NATURE_DOT: Record<Nature, string> = {
+  STRUCTURAL: "bg-[#b84a30]",
+  COGNITIVE:  "bg-[#2d5fa0]",
+  SONIC:      "bg-[#2d7a53]",
+  PHYSICAL:   "bg-[#9a7820]",
+};
+
+// Role badge colors (used for the secondary role badge)
+export const ROLE_COLORS: Record<CardRole, string> = {
+  DESTRUCTIVE:   "#b84a30",
+  TRANSFORMATIVE:"#2d5fa0",
+  CONSTRAINT:    "#6b6560",
+  STABILIZER:    "#2d7a53",
+};
+
+export const ROLE_LABELS: Record<CardRole, string> = {
+  DESTRUCTIVE:    "DESTRUCTEUR",
+  TRANSFORMATIVE: "TRANSFORMATIF",
+  CONSTRAINT:     "CONTRAINTE",
+  STABILIZER:     "STABILISATEUR",
 };

@@ -29,7 +29,6 @@ export default function GeneratePage() {
   const router = useRouter();
   const [result, setResult] = useState<GenerateResult | null>(null);
   const [generated, setGenerated] = useState(false);
-  const [recentIds, setRecentIds] = useState<string[]>([]);
   const [thirdCard, setThirdCard] = useState<Card | null>(null);
 
   const handleGenerate = useCallback(() => {
@@ -37,7 +36,6 @@ export default function GeneratePage() {
     const session = generateSession(recent);
     if (session) {
       pushRecentlyUsed([session.card1.id, session.card2.id]);
-      setRecentIds(getRecentlyUsed());
       setResult(session);
       setThirdCard(null);
     }
@@ -80,11 +78,6 @@ export default function GeneratePage() {
         >
           {generated ? "REGÉNÉRER LA SESSION" : "GÉNÉRER UNE SESSION"}
         </button>
-        {recentIds.length > 0 && (
-          <div className="mt-3 text-[#6b6560] text-xs tracking-wider break-all">
-            Récemment utilisées : {recentIds.join(" · ")}
-          </div>
-        )}
       </div>
 
       {/* Result */}
@@ -120,6 +113,11 @@ export default function GeneratePage() {
                 /15
               </span>
               <span className="text-[#6b6560]">Seuil : 8</span>
+              <span>
+                Tension :{" "}
+                <span className="font-bold text-[#1a1a18]">{result.tension}</span>
+                /10
+              </span>
             </div>
           </div>
 
@@ -185,24 +183,6 @@ export default function GeneratePage() {
         </div>
       )}
 
-      {/* Engine info */}
-      <div className="mt-12 sm:mt-16 border border-[#ddd5cc] p-4 sm:p-6 text-xs text-[#6b6560] bg-[#faf7f4]">
-        <div className="tracking-widest mb-3 uppercase font-medium text-[#4f4f49]">Logique du moteur</div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 leading-relaxed">
-          <div>
-            <span className="text-[#4f4f49] font-medium">Formule de poids :</span>{" "}
-            base × difficulty_factor × freshness_factor
-          </div>
-          <div>
-            <span className="text-[#4f4f49] font-medium">Facteur difficulté :</span>{" "}
-            1.0 + (difficulté − 1) × 0.125
-          </div>
-          <div>
-            <span className="text-[#4f4f49] font-medium">Facteur fraîcheur :</span>{" "}
-            0.3× pour les 5 dernières cartes utilisées, 1.0 sinon
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

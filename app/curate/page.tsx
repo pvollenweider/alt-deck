@@ -10,18 +10,17 @@ import {
   ExperienceLevel,
   Flexibility,
 } from "@/lib/engine";
-import { Card, SuitableFor as BandSize, RiskLevel } from "@/lib/cards";
+import { Card, RiskLevel } from "@/lib/cards";
 import { CardDisplay } from "@/components/CardDisplay";
 
 const DEFAULT_PROFILE: CurationProfile = {
-  band_size: "band",
   genre: "",
   experience_level: "intermediate",
   flexibility: "medium",
-  risk_tolerance: "medium",
+  risk_tolerance: 2,
 };
 
-function SelectField<T extends string>({
+function SelectField<T extends string | number>({
   label,
   value,
   options,
@@ -38,7 +37,7 @@ function SelectField<T extends string>({
       <div className="flex gap-0 border border-[#ddd5cc] bg-[#faf7f4]">
         {options.map((opt) => (
           <button
-            key={opt.value}
+            key={String(opt.value)}
             onClick={() => onChange(opt.value)}
             className={`flex-1 px-2 sm:px-4 py-2 text-xs tracking-widest border-r border-[#ddd5cc] last:border-r-0 font-medium uppercase transition-colors ${
               value === opt.value
@@ -109,17 +108,6 @@ export default function CuratePage() {
       <div className="border border-[#ddd5cc] p-5 sm:p-8 mb-8 sm:mb-10 bg-[#faf7f4]" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
         <div className="text-[#6b6560] text-xs tracking-widest mb-5 sm:mb-6 uppercase font-medium">Profil du groupe</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          <SelectField<BandSize>
-            label="Formation"
-            value={profile.band_size}
-            options={[
-              { value: "solo", label: "SOLO" },
-              { value: "duo", label: "DUO" },
-              { value: "band", label: "GROUPE" },
-            ]}
-            onChange={(v) => update("band_size", v)}
-          />
-
           <SelectField<ExperienceLevel>
             label="Niveau d'expérience"
             value={profile.experience_level}
@@ -146,14 +134,14 @@ export default function CuratePage() {
             label="Tolérance au risque"
             value={profile.risk_tolerance}
             options={[
-              { value: "low", label: "FAIBLE" },
-              { value: "medium", label: "MOYENNE" },
-              { value: "high", label: "ÉLEVÉE" },
+              { value: 1, label: "FAIBLE" },
+              { value: 2, label: "MOYENNE" },
+              { value: 3, label: "ÉLEVÉE" },
             ]}
             onChange={(v) => update("risk_tolerance", v)}
           />
 
-          <div className="sm:col-span-2 flex flex-col gap-2">
+          <div className="flex flex-col gap-2">
             <label className="text-[#6b6560] text-xs tracking-widest uppercase font-medium">
               Genre (optionnel)
             </label>
@@ -184,7 +172,7 @@ export default function CuratePage() {
         <div>
           {results.length === 0 ? (
             <div className="border border-[#b84a30] p-6 text-[#b84a30] text-sm tracking-wider bg-[#fdf2ef]">
-              AUCUNE PAIRE VALIDE pour ce profil. Ajuster la tolérance au risque ou la formation.
+              AUCUNE PAIRE VALIDE pour ce profil. Ajuster la tolérance au risque.
             </div>
           ) : (
             <div>
@@ -201,12 +189,12 @@ export default function CuratePage() {
                         <div className="flex items-center gap-4">
                           <span className="text-[#6b6560] text-xs tracking-widest uppercase font-medium">Paire {i + 1}</span>
                           <span className="text-[#4f4f49] text-xs">
-                            Score : {pair.rank_score.toFixed(2)}
+                            Score : {pair.rank_score.toFixed(2)} · Tension : {pair.tension.toFixed(1)}
                           </span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                           <span className="text-[#6b6560] text-xs uppercase tracking-wider">
-                            {pair.card1.category} + {pair.card2.category}{card3 ? ` + ${card3.category}` : ""}
+                            {pair.card1.nature} + {pair.card2.nature}{card3 ? ` + ${card3.nature}` : ""}
                           </span>
                           {!card3 ? (
                             <button

@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card, totalScore, CATEGORY_BG, CATEGORY_BORDER } from "@/lib/cards";
-import { generateSession, generateThirdCard } from "@/lib/engine";
+import { Card, totalScore, overallDifficulty, NATURE_BG, NATURE_BORDER, ROLE_LABELS } from "@/lib/cards";
+import { generateSession, generateThirdCard, computeTension } from "@/lib/engine";
 
 interface ActiveSession {
   card1: Card;
@@ -13,17 +13,36 @@ interface ActiveSession {
 
 function SessionCard({ card, label }: { card: Card; label: string }) {
   const score = totalScore(card);
+  const diff = overallDifficulty(card);
+  const riskLabel = card.risk === 3 ? "RISQUE ÉLEVÉ" : card.risk === 2 ? "RISQUE MOYEN" : "RISQUE FAIBLE";
+  const riskClass =
+    card.risk === 3
+      ? "border-[#b84a30] text-[#b84a30] bg-[#fdf2ef]"
+      : card.risk === 2
+      ? "border-[#9a7820] text-[#9a7820] bg-[#faf6ec]"
+      : "border-[#ddd5cc] text-[#6b6560]";
+
   return (
     <div
-      className={`bg-[#faf7f4] border-l-4 ${CATEGORY_BORDER[card.category]} border border-[#ddd5cc] p-6 sm:p-10 flex flex-col gap-4 sm:gap-6`}
+      className={`bg-[#faf7f4] border-l-4 ${NATURE_BORDER[card.nature]} border border-[#ddd5cc] p-6 sm:p-10 flex flex-col gap-4 sm:gap-6`}
       style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}
     >
       {/* Top row */}
-      <div className="flex items-center justify-between">
-        <span className={`${CATEGORY_BG[card.category]} text-white text-xs font-bold px-3 py-1 tracking-widest uppercase`}
-          style={{ borderRadius: "2px" }}>
-          {card.category}
-        </span>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span
+            className={`${NATURE_BG[card.nature]} text-white text-xs font-bold px-3 py-1 tracking-widest uppercase`}
+            style={{ borderRadius: "2px" }}
+          >
+            {card.nature}
+          </span>
+          <span
+            className="text-[#6b6560] text-xs border border-[#ddd5cc] px-2 py-1 tracking-widest uppercase bg-[#f5f0eb]"
+            style={{ borderRadius: "2px" }}
+          >
+            {ROLE_LABELS[card.role]}
+          </span>
+        </div>
         <span className="text-[#6b6560] text-xs tracking-widest uppercase">{label}</span>
       </div>
 
@@ -33,14 +52,16 @@ function SessionCard({ card, label }: { card: Card; label: string }) {
       </div>
 
       {/* Description */}
-      <div className="text-base sm:text-lg text-[#4f4f49] leading-relaxed flex-1">
+      <div className="text-base sm:text-lg text-[#4f4f49] leading-relaxed">
         {card.description}
       </div>
 
-      {/* Example */}
-      <div className="text-sm text-[#6b6560] leading-relaxed italic border-l-2 border-[#ddd5cc] pl-4">
-        {card.example}
-      </div>
+      {/* Rules */}
+      <ul className="text-sm text-[#6b6560] leading-relaxed space-y-2 border-l-2 border-[#ddd5cc] pl-4 flex-1">
+        {card.rules.map((rule, i) => (
+          <li key={i}>{rule}</li>
+        ))}
+      </ul>
 
       {/* Difficulty */}
       <div className="flex items-center gap-3">
@@ -49,9 +70,7 @@ function SessionCard({ card, label }: { card: Card; label: string }) {
           {[1, 2, 3, 4, 5].map((d) => (
             <div
               key={d}
-              className={`w-3 h-3 rounded-full ${
-                d <= card.difficulty ? "bg-[#b84a30]" : "bg-[#ddd5cc]"
-              }`}
+              className={`w-3 h-3 rounded-full ${d <= diff ? "bg-[#b84a30]" : "bg-[#ddd5cc]"}`}
             />
           ))}
         </div>
@@ -61,41 +80,26 @@ function SessionCard({ card, label }: { card: Card; label: string }) {
       <div className="border-t border-[#ddd5cc] pt-4 sm:pt-5 flex items-center justify-between">
         <div className="flex gap-4 sm:gap-6 text-xs text-[#6b6560]">
           <span>
-            STR <span className="text-[#4f4f49] font-semibold">{card.scores.structural_impact}</span>
+            STR <span className="text-[#4f4f49] font-semibold">{card.difficulty.structural}</span>
           </span>
           <span>
-            DIS <span className="text-[#4f4f49] font-semibold">{card.scores.performer_discomfort}</span>
+            DIS <span className="text-[#4f4f49] font-semibold">{card.difficulty.disorientation}</span>
           </span>
           <span>
-            PER <span className="text-[#4f4f49] font-semibold">{card.scores.perceptual_change}</span>
+            PER <span className="text-[#4f4f49] font-semibold">{card.difficulty.performance}</span>
           </span>
         </div>
         <div className="text-sm">
           <span className="text-[#6b6560] text-xs tracking-widest mr-2 uppercase">Score </span>
-          <span className={`font-bold ${score >= 8 ? "text-[#1a1a18]" : "text-[#b84a30]"}`}>
-            {score}
-          </span>
+          <span className={`font-bold ${score >= 8 ? "text-[#1a1a18]" : "text-[#b84a30]"}`}>{score}</span>
           <span className="text-[#6b6560]">/15</span>
         </div>
       </div>
 
-      {/* Tags */}
-      <div className="flex flex-wrap gap-2">
-        {card.tags.map((tag) => (
-          <span key={tag} className="text-[#6b6560] text-xs border border-[#ddd5cc] px-2 py-0.5 uppercase tracking-wider bg-[#f5f0eb]">
-            {tag}
-          </span>
-        ))}
-        <span
-          className={`text-xs border px-2 py-0.5 uppercase tracking-wider ml-auto font-medium ${
-            card.risk_level === "high"
-              ? "border-[#b84a30] text-[#b84a30] bg-[#fdf2ef]"
-              : card.risk_level === "medium"
-              ? "border-[#9a7820] text-[#9a7820] bg-[#faf6ec]"
-              : "border-[#ddd5cc] text-[#6b6560]"
-          }`}
-        >
-          {card.risk_level === "high" ? "RISQUE ÉLEVÉ" : card.risk_level === "medium" ? "RISQUE MOYEN" : "RISQUE FAIBLE"}
+      {/* Risk */}
+      <div className="flex justify-end">
+        <span className={`text-xs border px-2 py-0.5 uppercase tracking-wider font-medium ${riskClass}`}>
+          {riskLabel}
         </span>
       </div>
     </div>
@@ -112,9 +116,16 @@ export default function SessionPage() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as ActiveSession;
-        setSession(parsed);
+        // Discard sessions saved under the old schema (pre-v2: no rules/difficulty fields)
+        const isValid = (c: Card) =>
+          Array.isArray(c.rules) && c.difficulty != null && typeof c.difficulty === "object";
+        if (isValid(parsed.card1) && isValid(parsed.card2)) {
+          setSession(parsed);
+        } else {
+          sessionStorage.removeItem("altdeck_active_session");
+        }
       } catch {
-        // ignore
+        sessionStorage.removeItem("altdeck_active_session");
       }
     }
     setLoaded(true);
@@ -196,6 +207,10 @@ export default function SessionPage() {
   const score3 = session.card3 ? totalScore(session.card3) : null;
   const totalLoad = score1 + score2 + (score3 ?? 0);
   const maxLoad = session.card3 ? 45 : 30;
+  const allCards = session.card3
+    ? [session.card1, session.card2, session.card3]
+    : [session.card1, session.card2];
+  const tension = computeTension(allCards);
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -250,23 +265,27 @@ export default function SessionPage() {
         <span className="text-[#2d7a53] font-bold uppercase">✓ Valide</span>
         <span className="text-[#ddd5cc] hidden sm:inline">|</span>
         <span className="text-[#6b6560]">
-          C1 : <span className="text-[#1a1a18] font-medium">{session.card1.category}</span>{" "}
+          C1 : <span className="text-[#1a1a18] font-medium">{session.card1.nature}</span>{" "}
           <span className={score1 >= 8 ? "text-[#1a1a18] font-bold" : "text-[#b84a30] font-bold"}>{score1}</span>
         </span>
         <span className="text-[#ddd5cc] hidden sm:inline">|</span>
         <span className="text-[#6b6560]">
-          C2 : <span className="text-[#1a1a18] font-medium">{session.card2.category}</span>{" "}
+          C2 : <span className="text-[#1a1a18] font-medium">{session.card2.nature}</span>{" "}
           <span className={score2 >= 8 ? "text-[#1a1a18] font-bold" : "text-[#b84a30] font-bold"}>{score2}</span>
         </span>
         {session.card3 && score3 !== null && (
           <>
             <span className="text-[#ddd5cc] hidden sm:inline">|</span>
             <span className="text-[#6b6560]">
-              C3 : <span className="text-[#1a1a18] font-medium">{session.card3.category}</span>{" "}
+              C3 : <span className="text-[#1a1a18] font-medium">{session.card3.nature}</span>{" "}
               <span className={score3 >= 8 ? "text-[#1a1a18] font-bold" : "text-[#b84a30] font-bold"}>{score3}</span>
             </span>
           </>
         )}
+        <span className="text-[#ddd5cc] hidden sm:inline">|</span>
+        <span className="text-[#6b6560]">
+          Tension : <span className="text-[#1a1a18] font-bold">{tension.toFixed(1)}</span>
+        </span>
       </div>
 
       {/* Cards */}
