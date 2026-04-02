@@ -43,6 +43,11 @@ body {
   display: none;
 }
 
+@page {
+  size: A4;
+  margin: 1.8cm 2.2cm;
+}
+
 @media print {
   nav,
   .no-print {
@@ -57,23 +62,11 @@ body {
     background: white !important;
     background-color: white !important;
     font-size: 11pt;
+    line-height: 1.5;
   }
 
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-  }
-
-  .print-cards-grid {
-    display: grid !important;
-    gap: 14pt !important;
-  }
-
-  .print-cards-grid.cols-2 {
-    grid-template-columns: 1fr 1fr !important;
-  }
-
-  .print-cards-grid.cols-3 {
-    grid-template-columns: 1fr 1fr 1fr !important;
   }
 }

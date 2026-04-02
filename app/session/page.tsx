@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Card, totalScore, overallDifficulty, NATURE_BG, NATURE_BORDER, ROLE_LABELS } from "@/lib/cards";
 import {
   generateSession,
@@ -56,6 +57,123 @@ function saveSession(session: StoredSession) {
 
 function isValidCard(c: Card) {
   return Array.isArray(c.rules) && c.difficulty != null && typeof c.difficulty === "object";
+}
+
+// ─── Print layout ─────────────────────────────────────────────────────────────
+
+const NATURE_COLOR: Record<string, string> = {
+  STRUCTURAL: "#b84a30",
+  COGNITIVE:  "#2d5fa0",
+  SONIC:      "#2d7a53",
+  PHYSICAL:   "#9a7820",
+};
+
+function PrintView({
+  session,
+  allCards,
+  tension,
+}: {
+  session: StoredSession;
+  allCards: Card[];
+  tension: number;
+}) {
+  const date = new Date().toLocaleDateString("fr-FR", {
+    weekday: "long", year: "numeric", month: "long", day: "numeric",
+  });
+
+  return (
+    <div className="print-only" style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: "#1a1a18", lineHeight: 1.55 }}>
+
+      {/* En-tête */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "22pt", borderBottom: "2pt solid #b84a30", paddingBottom: "14pt" }}>
+        <Image src="/logo.svg" alt="ALT-Sessions" width={130} height={48} style={{ display: "block" }} />
+        <div style={{ textAlign: "right", fontSize: "9pt", color: "#6b6560", lineHeight: 1.7 }}>
+          <div style={{ fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.1em" }}>{date}</div>
+          {session.groupName && (
+            <div style={{ color: "#1a1a18", fontWeight: "bold", marginTop: "3pt" }}>{session.groupName}</div>
+          )}
+          {session.location && (
+            <div style={{ color: "#4f4f49" }}>{session.location}</div>
+          )}
+        </div>
+      </div>
+
+      {/* Résumé de session */}
+      <div style={{ fontSize: "8.5pt", textTransform: "uppercase", letterSpacing: "0.12em", color: "#6b6560", marginBottom: "18pt" }}>
+        {allCards.length} contrainte{allCards.length > 1 ? "s" : ""} actives
+        {" · "}Tension&nbsp;<strong style={{ color: "#1a1a18" }}>{tension.toFixed(1)}</strong>
+        {" · "}Préparation&nbsp;<strong style={{ color: "#1a1a18" }}>{session.prepTime}&nbsp;min</strong>
+      </div>
+
+      {/* Cartes */}
+      {allCards.map((card, i) => {
+        const natureColor = NATURE_COLOR[card.nature] ?? "#1a1a18";
+        return (
+          <div
+            key={card.id}
+            style={{
+              marginBottom: "28pt",
+              paddingBottom: "24pt",
+              borderBottom: i < allCards.length - 1 ? "0.5pt solid #ddd5cc" : "none",
+              pageBreakInside: "avoid",
+            }}
+          >
+            {/* Badge nature + rôle */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8pt", marginBottom: "8pt" }}>
+              <span style={{
+                fontSize: "7.5pt", fontFamily: "monospace", textTransform: "uppercase",
+                letterSpacing: "0.14em", fontWeight: "bold",
+                backgroundColor: natureColor, color: "white",
+                padding: "2pt 6pt", borderRadius: "2pt",
+              }}>
+                {card.nature}
+              </span>
+              <span style={{
+                fontSize: "7.5pt", fontFamily: "monospace", textTransform: "uppercase",
+                letterSpacing: "0.12em", color: "#6b6560",
+                border: "0.5pt solid #ddd5cc", padding: "2pt 6pt", borderRadius: "2pt",
+              }}>
+                {ROLE_LABELS[card.role]}
+              </span>
+              <span style={{ fontSize: "7.5pt", color: "#9b9690", letterSpacing: "0.1em" }}>
+                CONTRAINTE {i + 1}
+              </span>
+            </div>
+
+            {/* Titre */}
+            <div style={{
+              fontFamily: "monospace", fontSize: "26pt", fontWeight: "bold",
+              letterSpacing: "0.04em", lineHeight: 1.1,
+              marginBottom: "10pt", color: "#1a1a18",
+            }}>
+              {card.title}
+            </div>
+
+            {/* Description */}
+            <p style={{ fontSize: "11pt", lineHeight: 1.65, margin: "0 0 12pt 0", color: "#4f4f49" }}>
+              {card.description}
+            </p>
+
+            {/* Règles */}
+            <ol style={{ margin: 0, paddingLeft: "14pt", fontSize: "10pt", lineHeight: 1.75, color: "#1a1a18" }}>
+              {card.rules.map((rule, j) => (
+                <li key={j} style={{ marginBottom: "3pt" }}>{rule}</li>
+              ))}
+            </ol>
+          </div>
+        );
+      })}
+
+      {/* Pied de page */}
+      <div style={{
+        borderTop: "0.5pt solid #ddd5cc", paddingTop: "10pt",
+        fontSize: "8pt", textTransform: "uppercase", letterSpacing: "0.12em",
+        color: "#6b6560", textAlign: "center",
+      }}>
+        Ces contraintes sont actives pour toute la durée de cette session. Pas de négociation.
+      </div>
+    </div>
+  );
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -436,36 +554,18 @@ export default function SessionPage() {
     : [session.card1, session.card2];
   const tension = computeTension(allCards);
 
-  const sessionDate = new Date().toLocaleDateString("fr-FR", {
-    weekday: "long", year: "numeric", month: "long", day: "numeric",
-  });
-
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-
-      {/* ── Print-only header ─────────────────────────────────────────────── */}
-      <div className="print-only mb-8 border-b-2 border-[#b84a30] pb-6">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <div className="text-2xl font-bold tracking-widest font-mono text-[#1a1a18]">ALT-DECK</div>
-            <div className="text-xs tracking-widest text-[#6b6560] uppercase mt-1">Moteur de contraintes</div>
-          </div>
-          <div className="text-right text-xs text-[#6b6560] tracking-wide">
-            <div>{sessionDate}</div>
-            {session.groupName && <div className="font-bold text-[#1a1a18] mt-1">{session.groupName}</div>}
-            {session.location && <div className="text-[#4f4f49]">{session.location}</div>}
-          </div>
-        </div>
-        <div className="flex gap-6 text-xs text-[#6b6560] tracking-wider">
-          <span>Tension <span className="text-[#1a1a18] font-bold">{tension.toFixed(1)}</span></span>
-          <span>Charge <span className="text-[#1a1a18] font-bold">{totalLoad}/{maxLoad}</span></span>
-          <span>Préparation <span className="text-[#1a1a18] font-bold">{session.prepTime} min</span></span>
-          <span className="text-[#2d7a53] font-bold">✓ Session valide</span>
-        </div>
+    <>
+      {/* ── Layout PDF (caché à l'écran, visible en impression) ─────────── */}
+      <div className="print-only" style={{ padding: "0" }}>
+        <PrintView session={session} allCards={allCards} tension={tension} />
       </div>
 
+      {/* ── Interface écran ───────────────────────────────────────────────── */}
+      <div className="no-print max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+
       {/* ── Screen header ─────────────────────────────────────────────────── */}
-      <div className="no-print flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <div className="text-[#6b6560] text-xs tracking-widest mb-2 uppercase font-medium">Vue performance</div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-widest text-[#1a1a18] font-mono">SESSION</h1>
@@ -528,7 +628,7 @@ export default function SessionPage() {
 
       {/* IDLE: start button */}
       {session.phase === "IDLE" && (
-        <div className="no-print border border-[#ddd5cc] bg-[#faf7f4] p-6 sm:p-8 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="border border-[#ddd5cc] bg-[#faf7f4] p-6 sm:p-8 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="text-[#4f4f49] text-sm tracking-wider font-medium uppercase mb-1">
               Prêt à démarrer
@@ -555,7 +655,7 @@ export default function SessionPage() {
       )}
 
       {/* Session status bar */}
-      <div className="no-print flex flex-wrap items-center gap-3 sm:gap-6 border border-[#ddd5cc] bg-[#faf7f4] px-4 sm:px-6 py-3 mb-6 text-xs tracking-wider">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-6 border border-[#ddd5cc] bg-[#faf7f4] px-4 sm:px-6 py-3 mb-6 text-xs tracking-wider">
         <span className="text-[#2d7a53] font-bold uppercase">✓ Valide</span>
         <span className="text-[#ddd5cc] hidden sm:inline">|</span>
         <span className="text-[#6b6560]">
@@ -593,12 +693,7 @@ export default function SessionPage() {
         {session.card3 && <SessionCard card={session.card3} label="CARTE 3" />}
       </div>
 
-      {/* Footer */}
-      <div className="mt-6 sm:mt-8 border-t border-[#ddd5cc] pt-6 sm:pt-8 text-center">
-        <div className="text-[#6b6560] text-xs tracking-widest uppercase">
-          Ces contraintes sont actives pour toute la durée de cette session. Pas de négociation.
-        </div>
-      </div>
-    </div>
+      </div> {/* end no-print screen container */}
+    </>
   );
 }
