@@ -1,11 +1,13 @@
 export type Nature = "STRUCTURAL" | "SONIC" | "COGNITIVE" | "PHYSICAL";
 export type CardRole = "DESTRUCTIVE" | "TRANSFORMATIVE" | "CONSTRAINT" | "STABILIZER";
 export type RiskLevel = 1 | 2 | 3;
+export type PrepLevel = "LOW" | "MEDIUM" | "HIGH";
+export type TechImpact = "LOW" | "MEDIUM" | "HIGH";
 
 export interface Difficulty {
-  structural: number;    // impact on musical form/structure (0–5)
+  structural: number;     // impact on musical form/structure (0–5)
   disorientation: number; // perceptual disruption for audience/performers (0–5)
-  performance: number;   // execution difficulty for performers (0–5)
+  performance: number;    // execution difficulty for performers (0–5)
 }
 
 export interface Card {
@@ -17,6 +19,10 @@ export interface Card {
   rules: string[];
   difficulty: Difficulty;
   risk: RiskLevel;
+  // How long musicians need to understand & agree on this constraint
+  prepTime: PrepLevel;
+  // Impact on the technical / recording setup (mic positioning, gain staging, spatial)
+  techImpact: TechImpact;
   incompatibilities: string[];
   synergies: string[];
 }
@@ -46,6 +52,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 5, disorientation: 5, performance: 4 },
     risk: 3,
+    prepTime: "LOW",
+    techImpact: "LOW",
     incompatibilities: ["NO_LEADER", "TEMPO_FRACTURE"],
     synergies: ["FIXED_REFERENCE", "FIXED_TEMPO", "SILENCE_AS_STRUCTURE"],
   },
@@ -62,6 +70,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 5, disorientation: 5, performance: 5 },
     risk: 3,
+    prepTime: "HIGH",
+    techImpact: "MEDIUM",
     incompatibilities: ["MISE_A_NU", "REMOVE_HARMONY", "SILENCE_CORE"],
     synergies: ["FIXED_REFERENCE", "ANCHOR_INSTRUMENT", "CONSTANT_ELEMENT"],
   },
@@ -78,6 +88,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 5, disorientation: 5, performance: 4 },
     risk: 3,
+    prepTime: "HIGH",
+    techImpact: "MEDIUM",
     incompatibilities: ["REMOVE_CORE", "SILENCE_CORE"],
     synergies: ["FIXED_REFERENCE", "CONSTANT_ELEMENT", "ANCHOR_INSTRUMENT"],
   },
@@ -94,6 +106,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 4, disorientation: 5, performance: 3 },
     risk: 3,
+    prepTime: "MEDIUM",
+    techImpact: "LOW",
     incompatibilities: ["REMOVE_CORE"],
     synergies: ["NO_ATTACK", "SANS_RESONANCE", "REGISTER_LIMIT"],
   },
@@ -110,11 +124,13 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 5, disorientation: 4, performance: 3 },
     risk: 3,
+    prepTime: "HIGH",
+    techImpact: "LOW",
     incompatibilities: ["MISE_A_NU", "REMOVE_CORE"],
     synergies: ["SILENCE_AS_STRUCTURE", "BROKEN_FORM"],
   },
 
-  // ─── STRUCTURAL / TRANSFORMATIVE ────────────────────────────────────
+  // ─── STRUCTURAL / TRANSFORMATIVE ─────────────────────────────────────
   {
     id: "BROKEN_FORM",
     nature: "STRUCTURAL",
@@ -128,6 +144,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 5, disorientation: 4, performance: 3 },
     risk: 2,
+    prepTime: "MEDIUM",
+    techImpact: "LOW",
     incompatibilities: [],
     synergies: ["SILENCE_AS_STRUCTURE", "DEPLACEMENT_DE_FORME", "SILENCE_CORE"],
   },
@@ -144,6 +162,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 5, disorientation: 4, performance: 3 },
     risk: 2,
+    prepTime: "MEDIUM",
+    techImpact: "LOW",
     incompatibilities: [],
     synergies: ["BROKEN_FORM", "NO_GRID", "SILENCE_CORE"],
   },
@@ -160,6 +180,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 5, disorientation: 4, performance: 3 },
     risk: 2,
+    prepTime: "HIGH",
+    techImpact: "LOW",
     incompatibilities: [],
     synergies: ["BROKEN_FORM", "ONE_PASS_FLOW"],
   },
@@ -176,11 +198,13 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 4, disorientation: 5, performance: 5 },
     risk: 3,
+    prepTime: "MEDIUM",
+    techImpact: "LOW",
     incompatibilities: ["NO_GRID", "FIXED_TEMPO"],
     synergies: ["FIXED_REFERENCE", "CONSTANT_ELEMENT"],
   },
 
-  // ─── STRUCTURAL / CONSTRAINT ─────────────────────────────────────────
+  // ─── STRUCTURAL / CONSTRAINT ──────────────────────────────────────────
   {
     id: "ONE_PASS_FLOW",
     nature: "STRUCTURAL",
@@ -194,6 +218,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 4, disorientation: 3, performance: 2 },
     risk: 1,
+    prepTime: "LOW",
+    techImpact: "LOW",
     incompatibilities: [],
     synergies: ["BROKEN_FORM", "DEPLACEMENT_DE_FORME"],
   },
@@ -210,11 +236,13 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 4, disorientation: 4, performance: 4 },
     risk: 3,
+    prepTime: "HIGH",
+    techImpact: "LOW",
     incompatibilities: ["LIMITED_AGENCY"],
     synergies: ["ONE_PASS_FLOW", "REGISTER_LIMIT"],
   },
 
-  // ─── STRUCTURAL / STABILIZER ─────────────────────────────────────────
+  // ─── STRUCTURAL / STABILIZER ──────────────────────────────────────────
   {
     id: "FIXED_REFERENCE",
     nature: "STRUCTURAL",
@@ -228,6 +256,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 3, performance: 2 },
     risk: 1,
+    prepTime: "MEDIUM",
+    techImpact: "LOW",
     incompatibilities: [],
     synergies: ["REMOVE_CORE", "MISE_A_NU", "NO_GRID", "TEMPO_FRACTURE"],
   },
@@ -244,6 +274,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 2, performance: 3 },
     risk: 1,
+    prepTime: "LOW",
+    techImpact: "LOW",
     incompatibilities: ["NO_GRID", "TEMPO_FRACTURE"],
     synergies: ["NO_LEADER", "REMOVE_CORE", "MISE_A_NU"],
   },
@@ -260,11 +292,13 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 2, performance: 3 },
     risk: 1,
+    prepTime: "LOW",
+    techImpact: "LOW",
     incompatibilities: ["EFFECTIF_REDUIT"],
     synergies: ["REMOVE_CORE", "NO_LEADER", "ROLE_SWAP", "TEMPO_FRACTURE"],
   },
 
-  // ─── COGNITIVE / DESTRUCTIVE ─────────────────────────────────────────
+  // ─── COGNITIVE / DESTRUCTIVE ──────────────────────────────────────────
   {
     id: "NO_LEADER",
     nature: "COGNITIVE",
@@ -278,6 +312,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 4, performance: 5 },
     risk: 3,
+    prepTime: "LOW",
+    techImpact: "LOW",
     incompatibilities: ["NO_GRID"],
     synergies: ["ANCHOR_INSTRUMENT", "FIXED_TEMPO", "CONSTANT_ELEMENT"],
   },
@@ -294,11 +330,13 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 4, disorientation: 3, performance: 3 },
     risk: 2,
+    prepTime: "HIGH",
+    techImpact: "HIGH",
     incompatibilities: ["ANCHOR_INSTRUMENT"],
     synergies: [],
   },
 
-  // ─── COGNITIVE / TRANSFORMATIVE ──────────────────────────────────────
+  // ─── COGNITIVE / TRANSFORMATIVE ───────────────────────────────────────
   {
     id: "ROLE_SWAP",
     nature: "COGNITIVE",
@@ -312,6 +350,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 4, disorientation: 4, performance: 4 },
     risk: 2,
+    prepTime: "HIGH",
+    techImpact: "MEDIUM",
     incompatibilities: [],
     synergies: ["RHYTHM_MIGRATION", "INVERSION_DE_PLAN", "ROLE_INVERSION"],
   },
@@ -328,6 +368,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 4, disorientation: 4, performance: 4 },
     risk: 2,
+    prepTime: "MEDIUM",
+    techImpact: "MEDIUM",
     incompatibilities: [],
     synergies: ["ROLE_SWAP", "NO_GRID", "INVERSION_DE_PLAN"],
   },
@@ -344,6 +386,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 4, performance: 4 },
     risk: 2,
+    prepTime: "MEDIUM",
+    techImpact: "MEDIUM",
     incompatibilities: [],
     synergies: ["ROLE_SWAP", "RHYTHM_MIGRATION", "ROLE_INVERSION"],
   },
@@ -360,11 +404,13 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 4, performance: 4 },
     risk: 2,
+    prepTime: "HIGH",
+    techImpact: "LOW",
     incompatibilities: [],
     synergies: ["ROLE_SWAP", "INVERSION_DE_PLAN", "RHYTHM_MIGRATION"],
   },
 
-  // ─── COGNITIVE / CONSTRAINT ──────────────────────────────────────────
+  // ─── COGNITIVE / CONSTRAINT ───────────────────────────────────────────
   {
     id: "VOICE_OFF",
     nature: "COGNITIVE",
@@ -378,6 +424,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 2, disorientation: 4, performance: 4 },
     risk: 2,
+    prepTime: "LOW",
+    techImpact: "MEDIUM",
     incompatibilities: [],
     synergies: ["LOW_DYNAMIC_ONLY", "DYNAMIC_CEILING"],
   },
@@ -394,6 +442,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 3, performance: 5 },
     risk: 3,
+    prepTime: "MEDIUM",
+    techImpact: "LOW",
     incompatibilities: ["UN_SEUL_GESTE"],
     synergies: ["SANS_INITIATIVE"],
   },
@@ -410,11 +460,13 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 3, performance: 5 },
     risk: 3,
+    prepTime: "MEDIUM",
+    techImpact: "LOW",
     incompatibilities: [],
     synergies: ["LIMITED_AGENCY"],
   },
 
-  // ─── COGNITIVE / STABILIZER ──────────────────────────────────────────
+  // ─── COGNITIVE / STABILIZER ───────────────────────────────────────────
   {
     id: "CONSTANT_ELEMENT",
     nature: "COGNITIVE",
@@ -428,14 +480,13 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 2, performance: 3 },
     risk: 1,
+    prepTime: "HIGH",
+    techImpact: "LOW",
     incompatibilities: [],
     synergies: ["MISE_A_NU", "REMOVE_CORE", "NO_GRID", "TEMPO_FRACTURE"],
   },
 
-  // ─── SONIC / DESTRUCTIVE ─────────────────────────────────────────────
-  // (none, sonic destruction tends to be transformative)
-
-  // ─── SONIC / TRANSFORMATIVE ──────────────────────────────────────────
+  // ─── SONIC / TRANSFORMATIVE ───────────────────────────────────────────
   {
     id: "ACOUSTIC_SHIFT",
     nature: "SONIC",
@@ -449,6 +500,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 5, performance: 4 },
     risk: 2,
+    prepTime: "MEDIUM",
+    techImpact: "HIGH",
     incompatibilities: [],
     synergies: ["OBJETS_DU_LIEU", "INSTRUMENT_DEPLACE", "SANS_RESONANCE"],
   },
@@ -465,6 +518,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 5, performance: 4 },
     risk: 2,
+    prepTime: "HIGH",
+    techImpact: "HIGH",
     incompatibilities: [],
     synergies: ["ACOUSTIC_SHIFT", "INSTRUMENT_DEPLACE"],
   },
@@ -481,11 +536,13 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 4, performance: 5 },
     risk: 2,
+    prepTime: "HIGH",
+    techImpact: "MEDIUM",
     incompatibilities: [],
     synergies: ["ACOUSTIC_SHIFT", "OBJETS_DU_LIEU"],
   },
 
-  // ─── SONIC / CONSTRAINT ──────────────────────────────────────────────
+  // ─── SONIC / CONSTRAINT ───────────────────────────────────────────────
   {
     id: "LOW_DYNAMIC_ONLY",
     nature: "SONIC",
@@ -499,6 +556,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 2, disorientation: 4, performance: 3 },
     risk: 1,
+    prepTime: "LOW",
+    techImpact: "MEDIUM",
     incompatibilities: [],
     synergies: ["VOICE_OFF", "NO_ATTACK", "DYNAMIC_CEILING"],
   },
@@ -515,6 +574,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 2, disorientation: 5, performance: 4 },
     risk: 2,
+    prepTime: "MEDIUM",
+    techImpact: "LOW",
     incompatibilities: ["NO_SUSTAIN"],
     synergies: ["LOW_DYNAMIC_ONLY", "SANS_RESONANCE", "DYNAMIC_CEILING"],
   },
@@ -531,6 +592,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 4, performance: 3 },
     risk: 1,
+    prepTime: "MEDIUM",
+    techImpact: "LOW",
     incompatibilities: [],
     synergies: ["LOW_DYNAMIC_ONLY", "REMOVE_HARMONY", "LIMITED_RANGE"],
   },
@@ -547,6 +610,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 2, disorientation: 4, performance: 3 },
     risk: 1,
+    prepTime: "LOW",
+    techImpact: "LOW",
     incompatibilities: ["NO_ATTACK"],
     synergies: [],
   },
@@ -563,6 +628,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 2, disorientation: 4, performance: 3 },
     risk: 1,
+    prepTime: "LOW",
+    techImpact: "MEDIUM",
     incompatibilities: [],
     synergies: ["NO_ATTACK", "ACOUSTIC_SHIFT"],
   },
@@ -579,11 +646,13 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 2, disorientation: 4, performance: 3 },
     risk: 1,
+    prepTime: "LOW",
+    techImpact: "MEDIUM",
     incompatibilities: [],
     synergies: ["LOW_DYNAMIC_ONLY", "NO_ATTACK", "VOICE_OFF"],
   },
 
-  // ─── PHYSICAL / DESTRUCTIVE ──────────────────────────────────────────
+  // ─── PHYSICAL / DESTRUCTIVE ───────────────────────────────────────────
   {
     id: "NO_MONITOR",
     nature: "PHYSICAL",
@@ -597,11 +666,13 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 2, disorientation: 3, performance: 5 },
     risk: 3,
+    prepTime: "LOW",
+    techImpact: "HIGH",
     incompatibilities: [],
     synergies: [],
   },
 
-  // ─── PHYSICAL / TRANSFORMATIVE ───────────────────────────────────────
+  // ─── PHYSICAL / TRANSFORMATIVE ────────────────────────────────────────
   {
     id: "AUDIENCE_BLEED",
     nature: "PHYSICAL",
@@ -615,6 +686,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 5, performance: 4 },
     risk: 3,
+    prepTime: "HIGH",
+    techImpact: "HIGH",
     incompatibilities: ["PUBLIC_DISPERSE"],
     synergies: [],
   },
@@ -631,11 +704,13 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 5, performance: 4 },
     risk: 3,
+    prepTime: "HIGH",
+    techImpact: "HIGH",
     incompatibilities: ["AUDIENCE_BLEED"],
     synergies: [],
   },
 
-  // ─── PHYSICAL / CONSTRAINT ───────────────────────────────────────────
+  // ─── PHYSICAL / CONSTRAINT ────────────────────────────────────────────
   {
     id: "CIRCLE_MODE",
     nature: "PHYSICAL",
@@ -649,6 +724,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 2, disorientation: 3, performance: 4 },
     risk: 1,
+    prepTime: "MEDIUM",
+    techImpact: "MEDIUM",
     incompatibilities: [],
     synergies: ["BACK_TO_BACK", "DISTANCE_CONSTRAINT"],
   },
@@ -665,6 +742,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 2, disorientation: 4, performance: 4 },
     risk: 2,
+    prepTime: "MEDIUM",
+    techImpact: "HIGH",
     incompatibilities: [],
     synergies: ["CIRCLE_MODE"],
   },
@@ -681,6 +760,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 2, disorientation: 3, performance: 3 },
     risk: 1,
+    prepTime: "LOW",
+    techImpact: "LOW",
     incompatibilities: [],
     synergies: ["CIRCLE_MODE", "NO_MONITOR"],
   },
@@ -697,6 +778,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 2, disorientation: 4, performance: 3 },
     risk: 1,
+    prepTime: "LOW",
+    techImpact: "LOW",
     incompatibilities: [],
     synergies: [],
   },
@@ -713,6 +796,8 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 2, disorientation: 3, performance: 3 },
     risk: 1,
+    prepTime: "MEDIUM",
+    techImpact: "MEDIUM",
     incompatibilities: [],
     synergies: [],
   },
@@ -729,12 +814,14 @@ export const CARDS: Card[] = [
     ],
     difficulty: { structural: 3, disorientation: 4, performance: 4 },
     risk: 1,
+    prepTime: "HIGH",
+    techImpact: "LOW",
     incompatibilities: [],
     synergies: ["REGISTER_LIMIT", "UN_SEUL_GESTE"],
   },
 ];
 
-// ─── Appearance maps (keyed by Nature) ──────────────────────────────────────
+// ─── Appearance maps ──────────────────────────────────────────────────────────
 
 export const NATURE_COLORS: Record<Nature, string> = {
   STRUCTURAL: "#b84a30",
@@ -771,12 +858,11 @@ export const NATURE_DOT: Record<Nature, string> = {
   PHYSICAL:   "bg-[#9a7820]",
 };
 
-// Role badge colors (used for the secondary role badge)
 export const ROLE_COLORS: Record<CardRole, string> = {
-  DESTRUCTIVE:   "#b84a30",
-  TRANSFORMATIVE:"#2d5fa0",
-  CONSTRAINT:    "#6b6560",
-  STABILIZER:    "#2d7a53",
+  DESTRUCTIVE:    "#b84a30",
+  TRANSFORMATIVE: "#2d5fa0",
+  CONSTRAINT:     "#6b6560",
+  STABILIZER:     "#2d7a53",
 };
 
 export const ROLE_LABELS: Record<CardRole, string> = {
