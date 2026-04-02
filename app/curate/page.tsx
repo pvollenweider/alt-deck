@@ -57,6 +57,8 @@ function SelectField<T extends string | number>({
 export default function CuratePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<CurationProfile>(DEFAULT_PROFILE);
+  const [groupName, setGroupName] = useState("");
+  const [location, setLocation] = useState("");
   const [results, setResults] = useState<CurationPair[] | null>(null);
   const [curated, setCurated] = useState(false);
   const [thirdCards, setThirdCards] = useState<Record<string, Card | null>>({});
@@ -95,6 +97,8 @@ export default function CuratePage() {
         phase: "IDLE",
         phaseEndTime: null,
         phaseDuration: null,
+        ...(groupName.trim() ? { groupName: groupName.trim() } : {}),
+        ...(location.trim() ? { location: location.trim() } : {}),
       })
     );
     router.push("/session");
@@ -163,6 +167,34 @@ export default function CuratePage() {
               value={profile.genre}
               onChange={(e) => update("genre", e.target.value)}
               placeholder="ex. jazz, post-rock, électroacoustique..."
+              className="text-sm bg-[#f5f0eb] border border-[#ddd5cc] text-[#1a1a18] px-4 py-3 placeholder:text-[#6b6560] focus:border-[#1a1a18] outline-none tracking-wide"
+              style={{ borderRadius: "2px" }}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-[#6b6560] text-xs tracking-widest uppercase font-medium">
+              Nom du groupe (optionnel)
+            </label>
+            <input
+              type="text"
+              value={groupName}
+              onChange={(e) => setGroupName(e.target.value)}
+              placeholder="ex. Trio Vide, Ensemble X..."
+              className="text-sm bg-[#f5f0eb] border border-[#ddd5cc] text-[#1a1a18] px-4 py-3 placeholder:text-[#6b6560] focus:border-[#1a1a18] outline-none tracking-wide"
+              style={{ borderRadius: "2px" }}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-[#6b6560] text-xs tracking-widest uppercase font-medium">
+              Lieu (optionnel)
+            </label>
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="ex. Studio 103, Le Lieu Unique..."
               className="text-sm bg-[#f5f0eb] border border-[#ddd5cc] text-[#1a1a18] px-4 py-3 placeholder:text-[#6b6560] focus:border-[#1a1a18] outline-none tracking-wide"
               style={{ borderRadius: "2px" }}
             />

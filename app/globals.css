@@ -36,3 +36,44 @@ body {
   outline: 2px solid #b84a30;
   outline-offset: 2px;
 }
+
+/* ─── Print / PDF ────────────────────────────────────────────────────────── */
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  nav,
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  body {
+    background: white !important;
+    background-color: white !important;
+    font-size: 11pt;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .print-cards-grid {
+    display: grid !important;
+    gap: 14pt !important;
+  }
+
+  .print-cards-grid.cols-2 {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .print-cards-grid.cols-3 {
+    grid-template-columns: 1fr 1fr 1fr !important;
+  }
+}

@@ -211,6 +211,8 @@ export interface StoredSession {
   phase: SessionPhase;
   phaseEndTime: number | null;
   phaseDuration: number | null;
+  groupName?: string;
+  location?: string;
 }
 
 export function computePreparationTime(cards: Card[]): number {

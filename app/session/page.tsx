@@ -436,10 +436,36 @@ export default function SessionPage() {
     : [session.card1, session.card2];
   const tension = computeTension(allCards);
 
+  const sessionDate = new Date().toLocaleDateString("fr-FR", {
+    weekday: "long", year: "numeric", month: "long", day: "numeric",
+  });
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+
+      {/* ── Print-only header ─────────────────────────────────────────────── */}
+      <div className="print-only mb-8 border-b-2 border-[#b84a30] pb-6">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <div className="text-2xl font-bold tracking-widest font-mono text-[#1a1a18]">ALT-DECK</div>
+            <div className="text-xs tracking-widest text-[#6b6560] uppercase mt-1">Moteur de contraintes</div>
+          </div>
+          <div className="text-right text-xs text-[#6b6560] tracking-wide">
+            <div>{sessionDate}</div>
+            {session.groupName && <div className="font-bold text-[#1a1a18] mt-1">{session.groupName}</div>}
+            {session.location && <div className="text-[#4f4f49]">{session.location}</div>}
+          </div>
+        </div>
+        <div className="flex gap-6 text-xs text-[#6b6560] tracking-wider">
+          <span>Tension <span className="text-[#1a1a18] font-bold">{tension.toFixed(1)}</span></span>
+          <span>Charge <span className="text-[#1a1a18] font-bold">{totalLoad}/{maxLoad}</span></span>
+          <span>Préparation <span className="text-[#1a1a18] font-bold">{session.prepTime} min</span></span>
+          <span className="text-[#2d7a53] font-bold">✓ Session valide</span>
+        </div>
+      </div>
+
+      {/* ── Screen header ─────────────────────────────────────────────────── */}
+      <div className="no-print flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <div className="text-[#6b6560] text-xs tracking-widest mb-2 uppercase font-medium">Vue performance</div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-widest text-[#1a1a18] font-mono">SESSION</h1>
@@ -468,6 +494,13 @@ export default function SessionPage() {
             </button>
           )}
           <button
+            onClick={() => window.print()}
+            className="text-xs tracking-widest px-4 sm:px-6 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4]"
+            style={{ borderRadius: "2px" }}
+          >
+            PDF ↓
+          </button>
+          <button
             onClick={() => router.push("/generate")}
             className="text-xs tracking-widest px-4 sm:px-6 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4]"
             style={{ borderRadius: "2px" }}
@@ -485,15 +518,17 @@ export default function SessionPage() {
       </div>
 
       {/* Phase banner */}
-      <PhaseBanner
-        session={session}
-        timeLeftMs={timeLeftMs}
-        onAdvance={handleAdvancePhase}
-      />
+      <div className="no-print">
+        <PhaseBanner
+          session={session}
+          timeLeftMs={timeLeftMs}
+          onAdvance={handleAdvancePhase}
+        />
+      </div>
 
       {/* IDLE: start button */}
       {session.phase === "IDLE" && (
-        <div className="border border-[#ddd5cc] bg-[#faf7f4] p-6 sm:p-8 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="no-print border border-[#ddd5cc] bg-[#faf7f4] p-6 sm:p-8 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="text-[#4f4f49] text-sm tracking-wider font-medium uppercase mb-1">
               Prêt à démarrer
@@ -514,11 +549,13 @@ export default function SessionPage() {
 
       {/* PREPARATION: tech notes */}
       {session.phase === "PREPARATION" && (
-        <TechNotes cards={allCards} />
+        <div className="no-print">
+          <TechNotes cards={allCards} />
+        </div>
       )}
 
       {/* Session status bar */}
-      <div className="flex flex-wrap items-center gap-3 sm:gap-6 border border-[#ddd5cc] bg-[#faf7f4] px-4 sm:px-6 py-3 mb-6 text-xs tracking-wider">
+      <div className="no-print flex flex-wrap items-center gap-3 sm:gap-6 border border-[#ddd5cc] bg-[#faf7f4] px-4 sm:px-6 py-3 mb-6 text-xs tracking-wider">
         <span className="text-[#2d7a53] font-bold uppercase">✓ Valide</span>
         <span className="text-[#ddd5cc] hidden sm:inline">|</span>
         <span className="text-[#6b6560]">
@@ -550,7 +587,7 @@ export default function SessionPage() {
       </div>
 
       {/* Cards */}
-      <div className={`grid gap-4 sm:gap-6 grid-cols-1 ${session.card3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
+      <div className={`print-cards-grid ${session.card3 ? "cols-3" : "cols-2"} grid gap-4 sm:gap-6 grid-cols-1 ${session.card3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
         <SessionCard card={session.card1} label="CARTE 1" />
         <SessionCard card={session.card2} label="CARTE 2" />
         {session.card3 && <SessionCard card={session.card3} label="CARTE 3" />}
