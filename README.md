@@ -1,6 +1,6 @@
-# ALT-DECK — Moteur de contraintes v2
+# ALT-DECK — Moteur de contraintes v3
 
-Outil web pour générer et valider des sessions musicales sous contraintes. Conçu pour les ateliers et résidences **ALT-Sessions** : chaque session combine deux ou trois cartes-contraintes tirées d'un deck de 42, selon des règles de composition strictes.
+Outil web pour générer et valider des sessions musicales sous contraintes. Conçu pour les ateliers et résidences **ALT-Sessions** : chaque session combine deux ou trois cartes-contraintes tirées d'un deck de 42, selon des règles de composition strictes. En v3, la session est pilotée par une machine d'état avec minuterie intégrée.
 
 ---
 
@@ -40,13 +40,13 @@ alt-deck/
 │   ├── deck/page.tsx       # Vue de toutes les cartes, filtrables par nature
 │   ├── generate/page.tsx   # Génération aléatoire pondérée
 │   ├── curate/page.tsx     # Curation par profil de groupe
-│   └── session/page.tsx    # Vue session active (cartes en grand)
+│   └── session/page.tsx    # Vue session active avec machine d'état v3
 ├── components/
 │   ├── Nav.tsx             # Barre de navigation avec logo
 │   └── CardDisplay.tsx     # Composant carte réutilisable
 ├── lib/
 │   ├── cards.ts            # Données du deck (42 cartes) + types + constantes couleur
-│   └── engine.ts           # Moteur de génération, curation, tension
+│   └── engine.ts           # Moteur de génération, curation, tension, phases
 └── public/
     └── logo.svg            # Logo ALT-Sessions
 ```
@@ -71,6 +71,8 @@ interface Card {
     performance: number;      // 0–5 : exigence d'exécution
   };
   risk: 1 | 2 | 3;           // 1 = faible, 2 = moyen, 3 = élevé
+  prepTime: PrepLevel;        // "LOW" | "MEDIUM" | "HIGH" — temps de préparation conceptuelle
+  techImpact: TechImpact;    // "LOW" | "MEDIUM" | "HIGH" — impact sur le dispositif technique
   incompatibilities: string[]; // IDs des cartes incompatibles
   synergies: string[];         // IDs des cartes qui se complètent bien
 }
@@ -95,6 +97,16 @@ interface Card {
 | `TRANSFORMATIVE` | Redirige ou recadre quelque chose d'existant |
 | `CONSTRAINT` | Applique une règle limitative sans supprimer |
 | `STABILIZER` | Préserve un ancrage pour rendre les combos agressifs jouables |
+
+### Niveaux de préparation
+
+`prepTime` et `techImpact` sont assignés manuellement à chaque carte. Ils ne sont pas dérivés des scores de difficulté.
+
+| Valeur | Signification (prepTime) | Signification (techImpact) |
+|---|---|---|
+| `LOW` | Décision instantanée, aucun accord préalable | Aucun changement de dispositif |
+| `MEDIUM` | Nécessite une concertation ou répétition courte | Ajustements mineurs (gain, placement) |
+| `HIGH` | Réorganisation de groupe ou accord complexe | Reconfiguration micros, espace, monitoring |
 
 ### Deck complet (42 cartes)
 
@@ -190,6 +202,33 @@ La variance mesure le déséquilibre de désorientation entre les cartes. La som
 
 Quand le risque cumulé de la paire de base dépasse 5, la troisième carte doit obligatoirement être un **STABILIZER**. Elle ne peut pas avoir la même nature que les deux premières cartes.
 
+### Temps de préparation
+
+```
+computePreparationTime(cards):
+  base = 8 min
+  + 2 par carte avec prepTime "HIGH"
+  + 2 par carte avec techImpact "HIGH"
+  + 1 si tension ≥ 7
+  plafond : 15 min
+```
+
+### Phases de session
+
+```
+IDLE → REVEAL (2 min) → PREPARATION (calculé) → LOCK (1 min) → PLAYING
+```
+
+| Phase | Durée | Description |
+|---|---|---|
+| `IDLE` | — | Session prête, en attente de démarrage manuel |
+| `REVEAL` | 2:00 | Découverte des contraintes par les musiciens |
+| `PREPARATION` | calculé | Installation technique, concertation |
+| `LOCK` | 1:00 | Dernier calage, plus de modifications |
+| `PLAYING` | — | Session active |
+
+Le passage REVEAL→PREPARATION et PREPARATION→LOCK peut être avancé manuellement. Le passage LOCK→PLAYING est automatique.
+
 ### Génération aléatoire pondérée
 
 ```
@@ -249,7 +288,15 @@ Génère une paire valide via l'algorithme pondéré. Affiche les scores et la t
 Formulaire de profil groupe (expérience, flexibilité, tolérance au risque, genre). Retourne jusqu'à 3 paires classées avec leur score de tension. Chaque paire est directement lançable en session.
 
 ### `/session` — Session active
-Vue pleine-page des cartes actives avec leurs règles. Charge depuis `sessionStorage` (`altdeck_active_session`). Affiche la charge totale et la tension. Permet la génération rapide depuis cette page.
+Vue pleine-page avec machine d'état v3. Charge depuis `sessionStorage` (`altdeck_active_session`).
+
+- **IDLE** : cartes visibles, ajout/retrait de la 3ème carte possible, bouton "DÉMARRER LA SESSION"
+- **REVEAL** : countdown 2 min, bouton "PASSER →" pour avancer manuellement
+- **PREPARATION** : countdown calculé, notes techniques (cartes HIGH techImpact), bouton "PRÊT →"
+- **LOCK** : countdown 1 min, passage automatique vers PLAYING
+- **PLAYING** : indicateur ● LIVE, cartes en plein écran, pas de timer
+
+La minuterie utilise `phaseEndTime` (timestamp absolu) : un rechargement de page restaure le temps restant exact.
 
 ---
 
@@ -273,6 +320,16 @@ STRUCTURAL → #b84a30 (terracotta)
 COGNITIVE  → #2d5fa0 (bleu ardoise)
 SONIC      → #2d7a53 (vert forêt)
 PHYSICAL   → #9a7820 (ocre)
+```
+
+Phases :
+
+```
+IDLE        → #6b6560 (gris)
+REVEAL      → #2d5fa0 (bleu)
+PREPARATION → #9a7820 (ocre)
+LOCK        → #b84a30 (terracotta)
+PLAYING     → #2d7a53 (vert)
 ```
 
 Typo : **monospace** pour les titres de cartes, système pour l'interface.
@@ -301,5 +358,19 @@ npm run start   # serveur de production
 
 | Clé | Stockage | Contenu |
 |---|---|---|
-| `altdeck_active_session` | `sessionStorage` | `{ card1: Card, card2: Card, card3?: Card }` — session en cours |
+| `altdeck_active_session` | `sessionStorage` | `StoredSession` — session en cours avec phase et minuterie |
 | `altdeck_recently_used` | `localStorage` | `string[]` — IDs des 5 dernières cartes utilisées |
+
+### Interface `StoredSession`
+
+```ts
+interface StoredSession {
+  card1: Card;
+  card2: Card;
+  card3?: Card;
+  prepTime: number;          // durée de préparation en minutes (calculée)
+  phase: SessionPhase;       // phase courante
+  phaseEndTime: number | null; // timestamp absolu de fin de phase (ms)
+  phaseDuration: number | null; // durée totale de la phase en secondes (pour la barre)
+}
+```
