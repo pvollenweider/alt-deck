@@ -1,4 +1,5 @@
 import { Card, CardRole, CARDS, RiskLevel, totalScore } from "./cards";
+// PrepLevel and TechImpact are referenced via card.prepTime / card.techImpact (typed on Card)
 
 // ─── Incompatibility ─────────────────────────────────────────────────────────
 
@@ -196,6 +197,30 @@ export function generateThirdCard(
   });
 
   return weightedPick(pool, context);
+}
+
+// ─── Session Phases ──────────────────────────────────────────────────────────
+
+export type SessionPhase = "IDLE" | "REVEAL" | "PREPARATION" | "LOCK" | "PLAYING";
+
+export interface StoredSession {
+  card1: Card;
+  card2: Card;
+  card3?: Card;
+  prepTime: number;
+  phase: SessionPhase;
+  phaseEndTime: number | null;
+  phaseDuration: number | null;
+}
+
+export function computePreparationTime(cards: Card[]): number {
+  let time = 8;
+  for (const card of cards) {
+    if (card.prepTime === "HIGH") time += 2;
+    if (card.techImpact === "HIGH") time += 2;
+  }
+  if (computeTension(cards) >= 7) time += 1;
+  return Math.min(time, 15);
 }
 
 // ─── Curation Mode ───────────────────────────────────────────────────────────

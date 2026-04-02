@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { generateSession, generateThirdCard, GenerateResult } from "@/lib/engine";
+import { generateSession, generateThirdCard, computePreparationTime, GenerateResult } from "@/lib/engine";
 import { Card, totalScore } from "@/lib/cards";
 import { CardDisplay } from "@/components/CardDisplay";
 
@@ -51,9 +51,21 @@ export default function GeneratePage() {
 
   const handleLaunchSession = () => {
     if (!result) return;
+    const cards = thirdCard
+      ? [result.card1, result.card2, thirdCard]
+      : [result.card1, result.card2];
+    const prepTime = computePreparationTime(cards);
     sessionStorage.setItem(
       "altdeck_active_session",
-      JSON.stringify({ card1: result.card1, card2: result.card2, ...(thirdCard ? { card3: thirdCard } : {}) })
+      JSON.stringify({
+        card1: result.card1,
+        card2: result.card2,
+        ...(thirdCard ? { card3: thirdCard } : {}),
+        prepTime,
+        phase: "IDLE",
+        phaseEndTime: null,
+        phaseDuration: null,
+      })
     );
     router.push("/session");
   };

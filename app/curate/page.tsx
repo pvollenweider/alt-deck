@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   curate,
   generateThirdCard,
+  computePreparationTime,
   CurationProfile,
   CurationPair,
   ExperienceLevel,
@@ -80,9 +81,21 @@ export default function CuratePage() {
 
   const handleLaunchSession = (pair: CurationPair) => {
     const card3 = thirdCards[pairKey(pair)];
+    const cards = card3
+      ? [pair.card1, pair.card2, card3]
+      : [pair.card1, pair.card2];
+    const prepTime = computePreparationTime(cards);
     sessionStorage.setItem(
       "altdeck_active_session",
-      JSON.stringify({ card1: pair.card1, card2: pair.card2, ...(card3 ? { card3 } : {}) })
+      JSON.stringify({
+        card1: pair.card1,
+        card2: pair.card2,
+        ...(card3 ? { card3 } : {}),
+        prepTime,
+        phase: "IDLE",
+        phaseEndTime: null,
+        phaseDuration: null,
+      })
     );
     router.push("/session");
   };
