@@ -801,6 +801,66 @@ export const CARDS: Card[] = [
     incompatibilities: [],
     synergies: [],
   },
+  // ─── COGNITIVE / TRANSFORMATIVE ──────────────────────────────────────
+  {
+    id: "ERROR_BECOMES_FORM",
+    nature: "COGNITIVE",
+    role: "TRANSFORMATIVE",
+    title: "ERROR BECOMES FORM",
+    description: "Toute erreur perceptible devient immédiatement une nouvelle règle locale.",
+    rules: [
+      "Dès qu'une erreur claire apparaît, elle doit être reprise par au moins un autre musicien",
+      "L'erreur ne doit pas être corrigée, mais intégrée comme matériau",
+      "Si plusieurs erreurs surviennent, seule la première fait loi jusqu'à la fin",
+    ],
+    difficulty: { structural: 3, disorientation: 4, performance: 2 },
+    risk: 2,
+    prepTime: "MEDIUM",
+    techImpact: "LOW",
+    incompatibilities: ["FIXED_REFERENCE", "CONSTANT_ELEMENT"],
+    synergies: ["NO_LEADER", "TEMPO_FRACTURE", "INSTRUMENT_DEPLACE"],
+  },
+
+  // ─── STRUCTURAL / TRANSFORMATIVE ──────────────────────────────────────
+  {
+    id: "REPETITION_DRIFT",
+    nature: "STRUCTURAL",
+    role: "TRANSFORMATIVE",
+    title: "REPETITION DRIFT",
+    description: "Un même motif doit être répété plusieurs fois, mais jamais deux fois identiquement.",
+    rules: [
+      "Choisir un motif récurrent au début",
+      "Chaque répétition doit contenir une micro-altération perceptible : durée, accent, placement, hauteur, articulation",
+      "Aucune répétition strictement identique n'est autorisée",
+    ],
+    difficulty: { structural: 3, disorientation: 3, performance: 3 },
+    risk: 1,
+    prepTime: "LOW",
+    techImpact: "LOW",
+    incompatibilities: [],
+    synergies: ["UN_SEUL_GESTE", "CONSTANT_ELEMENT", "LIMITED_RANGE"],
+  },
+
+  // ─── SONIC / CONSTRAINT ───────────────────────────────────────────────
+  {
+    id: "BORING_MATERIAL",
+    nature: "SONIC",
+    role: "CONSTRAINT",
+    title: "BORING MATERIAL",
+    description: "Chaque musicien commence par une matière minimale, pauvre, sans virtuosité ni signature forte.",
+    rules: [
+      "Le début de la session doit partir d'un matériau volontairement banal",
+      "Aucun effet de style ni geste spectaculaire dans la première minute",
+      "La transformation doit venir du cadre, pas de la séduction initiale",
+    ],
+    difficulty: { structural: 2, disorientation: 2, performance: 3 },
+    risk: 1,
+    prepTime: "LOW",
+    techImpact: "LOW",
+    incompatibilities: [],
+    synergies: ["LOW_DYNAMIC_ONLY", "MISE_A_NU", "ONE_PASS_FLOW"],
+  },
+
   {
     id: "LIMITED_RANGE",
     nature: "PHYSICAL",
