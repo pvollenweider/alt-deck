@@ -39,7 +39,7 @@ export default function HomePage() {
       {/* Header */}
       <div className="mb-16">
         <div className="text-[#6b6560] text-xs tracking-widest mb-4 uppercase font-medium">
-          Moteur de contraintes v2.0
+          Moteur de contraintes v3
         </div>
         <h1 className="text-5xl font-bold tracking-widest text-[#1a1a18] mb-2 font-mono">
           ALT-DECK

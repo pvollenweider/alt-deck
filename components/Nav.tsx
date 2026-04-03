@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: "/generate", label: "GÉNÉRER" },
   { href: "/curate", label: "CURATION" },
   { href: "/session", label: "SESSION" },
+  { href: "/about", label: "CONCEPT" },
 ];
 
 export function Nav() {

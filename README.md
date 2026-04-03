@@ -1,6 +1,6 @@
 # ALT-DECK — Moteur de contraintes v3
 
-Outil web pour générer et valider des sessions musicales sous contraintes. Conçu pour les ateliers et résidences **ALT-Sessions** : chaque session combine deux ou trois cartes-contraintes tirées d'un deck de 42, selon des règles de composition strictes. En v3, la session est pilotée par une machine d'état avec minuterie intégrée.
+Outil web pour générer et valider des sessions musicales sous contraintes. Conçu pour les ateliers et résidences **ALT-Sessions** : chaque session combine deux ou trois cartes-contraintes tirées d'un deck de 45, selon des règles de composition strictes. En v3, la session est pilotée par une machine d'état avec minuterie intégrée.
 
 ---
 
@@ -45,7 +45,7 @@ alt-deck/
 │   ├── Nav.tsx             # Barre de navigation avec logo
 │   └── CardDisplay.tsx     # Composant carte réutilisable
 ├── lib/
-│   ├── cards.ts            # Données du deck (42 cartes) + types + constantes couleur
+│   ├── cards.ts            # Données du deck (45 cartes) + types + constantes couleur
 │   └── engine.ts           # Moteur de génération, curation, tension, phases
 └── public/
     └── logo.svg            # Logo ALT-Sessions
@@ -110,7 +110,7 @@ interface Card {
 
 ### Deck complet (42 cartes)
 
-**STRUCTURAL — 14 cartes**
+**STRUCTURAL — 15 cartes**
 
 | ID | Titre | Rôle | Score | Risque |
 |---|---|---|---|---|
@@ -123,13 +123,14 @@ interface Card {
 | `SILENCE_AS_STRUCTURE` | SILENCE AS STRUCTURE | TRANSFORMATIVE | 12 | Moyen |
 | `DEPLACEMENT_DE_FORME` | DÉPLACEMENT DE FORME | TRANSFORMATIVE | 12 | Moyen |
 | `TEMPO_FRACTURE` | TEMPO FRACTURE | TRANSFORMATIVE | 14 | Élevé |
+| `REPETITION_DRIFT` | REPETITION DRIFT | TRANSFORMATIVE | 9 | Faible |
 | `ONE_PASS_FLOW` | ONE PASS FLOW | CONSTRAINT | 9 | Faible |
 | `UN_SEUL_GESTE` | UN SEUL GESTE | CONSTRAINT | 12 | Élevé |
 | `FIXED_REFERENCE` | FIXED REFERENCE | STABILIZER | 8 | Faible |
 | `FIXED_TEMPO` | FIXED TEMPO | STABILIZER | 8 | Faible |
 | `ANCHOR_INSTRUMENT` | ANCHOR INSTRUMENT | STABILIZER | 8 | Faible |
 
-**COGNITIVE — 10 cartes**
+**COGNITIVE — 11 cartes**
 
 | ID | Titre | Rôle | Score | Risque |
 |---|---|---|---|---|
@@ -139,12 +140,13 @@ interface Card {
 | `RHYTHM_MIGRATION` | RHYTHM MIGRATION | TRANSFORMATIVE | 12 | Moyen |
 | `INVERSION_DE_PLAN` | INVERSION DE PLAN | TRANSFORMATIVE | 11 | Moyen |
 | `ROLE_INVERSION` | ROLE INVERSION | TRANSFORMATIVE | 11 | Moyen |
+| `ERROR_BECOMES_FORM` | ERROR BECOMES FORM | TRANSFORMATIVE | 9 | Moyen |
 | `VOICE_OFF` | VOICE OFF | CONSTRAINT | 10 | Moyen |
 | `LIMITED_AGENCY` | LIMITED AGENCY | CONSTRAINT | 11 | Élevé |
 | `SANS_INITIATIVE` | SANS INITIATIVE | CONSTRAINT | 11 | Élevé |
 | `CONSTANT_ELEMENT` | CONSTANT ELEMENT | STABILIZER | 8 | Faible |
 
-**SONIC — 9 cartes**
+**SONIC — 10 cartes**
 
 | ID | Titre | Rôle | Score | Risque |
 |---|---|---|---|---|
@@ -157,6 +159,7 @@ interface Card {
 | `NO_SUSTAIN` | NO SUSTAIN | CONSTRAINT | 9 | Faible |
 | `SANS_RESONANCE` | SANS RÉSONANCE | CONSTRAINT | 9 | Faible |
 | `DYNAMIC_CEILING` | DYNAMIC CEILING | CONSTRAINT | 9 | Faible |
+| `BORING_MATERIAL` | BORING MATERIAL | CONSTRAINT | 7 | Faible |
 
 **PHYSICAL — 9 cartes**
 
