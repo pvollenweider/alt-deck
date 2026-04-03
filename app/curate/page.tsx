@@ -230,17 +230,19 @@ export default function CuratePage() {
                   const card3 = thirdCards[key];
                   return (
                     <div key={key} className="border border-[#ddd5cc] p-4 sm:p-6 bg-[#faf7f4]" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
-                        <div className="flex items-center gap-4">
-                          <span className="text-[#6b6560] text-xs tracking-widest uppercase font-medium">Paire {i + 1}</span>
-                          <span className="text-[#4f4f49] text-xs">
-                            Score : {pair.rank_score.toFixed(2)} · Tension : {pair.tension.toFixed(1)}
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                      <div className="flex flex-col gap-3 mb-4 sm:mb-6">
+                        <div className="flex items-center justify-between gap-3 flex-wrap">
+                          <div className="flex items-center gap-4">
+                            <span className="text-[#6b6560] text-xs tracking-widest uppercase font-medium">Paire {i + 1}</span>
+                            <span className="text-[#4f4f49] text-xs">
+                              Score : {pair.rank_score.toFixed(2)} · Tension : {pair.tension.toFixed(1)}
+                            </span>
+                          </div>
                           <span className="text-[#6b6560] text-xs uppercase tracking-wider">
                             {pair.card1.nature} + {pair.card2.nature}{card3 ? ` + ${card3.nature}` : ""}
                           </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                           {!card3 ? (
                             <button
                               onClick={() => handleAddThird(pair)}

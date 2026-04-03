@@ -206,7 +206,7 @@ function PhaseBanner({
             {meta.subtitle}
           </span>
           {phase === "PREPARATION" && (
-            <span className="text-[#9a7820] text-xs tracking-wider">
+            <span className="text-[#9a7820] text-xs tracking-wider hidden sm:inline">
               — {prepTime} min allouées
             </span>
           )}
@@ -565,55 +565,62 @@ export default function SessionPage() {
       <div className="no-print max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
       {/* ── Screen header ─────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+      <div className="flex items-start justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <div className="text-[#6b6560] text-xs tracking-widest mb-2 uppercase font-medium">Vue performance</div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-widest text-[#1a1a18] font-mono">SESSION</h1>
           <div className="w-10 h-0.5 bg-[#b84a30] mt-2" />
         </div>
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <div className="text-[#6b6560] text-xs tracking-widest px-3 sm:px-4 py-2 border border-[#ddd5cc] bg-[#faf7f4] uppercase">
-            Charge : {totalLoad}/{maxLoad}
+        {/* Right column: two rows on mobile, one row on desktop */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 shrink-0">
+          {/* Row 1: session management */}
+          <div className="flex items-center gap-2 flex-wrap justify-end sm:justify-start">
+            <div className="text-[#6b6560] text-xs tracking-widest px-3 py-2 border border-[#ddd5cc] bg-[#faf7f4] uppercase whitespace-nowrap">
+              {totalLoad}/{maxLoad}
+            </div>
+            {session.phase === "IDLE" && !session.card3 && (
+              <button
+                onClick={handleAddThirdCard}
+                className="text-xs tracking-widest px-3 sm:px-5 py-2 border border-[#9a7820] text-[#9a7820] hover:bg-[#9a7820] hover:text-white uppercase transition-colors bg-[#faf7f4] font-bold whitespace-nowrap"
+                style={{ borderRadius: "2px" }}
+              >
+                + 3ÈME
+              </button>
+            )}
+            {session.phase === "IDLE" && session.card3 && (
+              <button
+                onClick={handleRemoveThirdCard}
+                className="text-xs tracking-widest px-3 sm:px-5 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#b84a30] hover:border-[#b84a30] uppercase transition-colors bg-[#faf7f4] whitespace-nowrap"
+                style={{ borderRadius: "2px" }}
+              >
+                RETIRER
+              </button>
+            )}
           </div>
-          {session.phase === "IDLE" && !session.card3 && (
+          {/* Row 2: actions */}
+          <div className="flex items-center gap-2 flex-wrap justify-end sm:justify-start">
             <button
-              onClick={handleAddThirdCard}
-              className="text-xs tracking-widest px-4 sm:px-6 py-2 border border-[#9a7820] text-[#9a7820] hover:bg-[#9a7820] hover:text-white uppercase transition-colors bg-[#faf7f4] font-bold"
+              onClick={() => window.print()}
+              className="text-xs tracking-widest px-3 sm:px-5 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4] whitespace-nowrap"
               style={{ borderRadius: "2px" }}
             >
-              + 3ÈME
+              PDF ↓
             </button>
-          )}
-          {session.phase === "IDLE" && session.card3 && (
             <button
-              onClick={handleRemoveThirdCard}
-              className="text-xs tracking-widest px-4 sm:px-6 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#b84a30] hover:border-[#b84a30] uppercase transition-colors bg-[#faf7f4]"
+              onClick={() => router.push("/generate")}
+              className="text-xs tracking-widest px-3 sm:px-5 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4] whitespace-nowrap"
               style={{ borderRadius: "2px" }}
             >
-              RETIRER 3ÈME
+              NOUVELLE
             </button>
-          )}
-          <button
-            onClick={() => window.print()}
-            className="text-xs tracking-widest px-4 sm:px-6 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4]"
-            style={{ borderRadius: "2px" }}
-          >
-            PDF ↓
-          </button>
-          <button
-            onClick={() => router.push("/generate")}
-            className="text-xs tracking-widest px-4 sm:px-6 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4]"
-            style={{ borderRadius: "2px" }}
-          >
-            NOUVELLE
-          </button>
-          <button
-            onClick={handleQuickGenerate}
-            className="text-xs tracking-widest px-4 sm:px-6 py-2 bg-[#b84a30] text-white font-bold hover:bg-[#8c3622] uppercase transition-colors"
-            style={{ borderRadius: "2px" }}
-          >
-            ALÉATOIRE
-          </button>
+            <button
+              onClick={handleQuickGenerate}
+              className="text-xs tracking-widest px-3 sm:px-5 py-2 bg-[#b84a30] text-white font-bold hover:bg-[#8c3622] uppercase transition-colors whitespace-nowrap"
+              style={{ borderRadius: "2px" }}
+            >
+              ALÉATOIRE
+            </button>
+          </div>
         </div>
       </div>
 

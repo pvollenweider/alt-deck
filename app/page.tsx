@@ -41,7 +41,7 @@ export default function HomePage() {
         <div className="text-[#6b6560] text-xs tracking-widest mb-4 uppercase font-medium">
           Moteur de contraintes v3
         </div>
-        <h1 className="text-5xl font-bold tracking-widest text-[#1a1a18] mb-2 font-mono">
+        <h1 className="text-3xl sm:text-5xl font-bold tracking-widest text-[#1a1a18] mb-2 font-mono">
           ALT-DECK
         </h1>
         <div className="w-16 h-0.5 bg-[#b84a30] mb-6" />
@@ -52,16 +52,16 @@ export default function HomePage() {
       </div>
 
       {/* Stats bar */}
-      <div className="border border-[#ddd5cc] grid grid-cols-3 mb-16 bg-[#faf7f4]" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <div className="border-r border-[#ddd5cc] p-6">
+      <div className="border border-[#ddd5cc] grid grid-cols-1 sm:grid-cols-3 mb-10 sm:mb-16 bg-[#faf7f4]" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+        <div className="border-b sm:border-b-0 sm:border-r border-[#ddd5cc] p-5 sm:p-6">
           <div className="text-[#6b6560] text-xs tracking-widest mb-1 uppercase">Total cartes</div>
           <div className="text-3xl font-bold text-[#1a1a18]">{totalCards}</div>
         </div>
-        <div className="border-r border-[#ddd5cc] p-6">
+        <div className="border-b sm:border-b-0 sm:border-r border-[#ddd5cc] p-5 sm:p-6">
           <div className="text-[#6b6560] text-xs tracking-widest mb-1 uppercase">Score moy.</div>
           <div className="text-3xl font-bold text-[#1a1a18]">{avgScore}<span className="text-lg text-[#6b6560] font-normal">/15</span></div>
         </div>
-        <div className="p-6">
+        <div className="p-5 sm:p-6">
           <div className="text-[#6b6560] text-xs tracking-widest mb-2 uppercase">Natures</div>
           <div className="flex gap-2 flex-wrap">
             <span className="text-xs bg-[#b84a30] text-white px-2 py-0.5 font-medium tracking-wider">STRUCTURAL</span>
@@ -73,14 +73,14 @@ export default function HomePage() {
       </div>
 
       {/* Nav sections */}
-      <div className="grid grid-cols-2 gap-0 border border-[#ddd5cc] bg-[#faf7f4]" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 border border-[#ddd5cc] bg-[#faf7f4]" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
         {sections.map((section, i) => (
           <Link
             key={section.href}
             href={section.href}
-            className={`p-8 border-[#ddd5cc] hover:bg-[#f5f0eb] group transition-colors ${
-              i % 2 === 0 ? "border-r" : ""
-            } ${i < 2 ? "border-b" : ""}`}
+            className={`p-6 sm:p-8 border-[#ddd5cc] hover:bg-[#f5f0eb] group transition-colors ${
+              i < sections.length - 1 ? "border-b" : ""
+            } ${i % 2 === 0 ? "sm:border-r" : ""} ${i < 2 ? "sm:border-b" : "sm:border-b-0"}`}
           >
             <div className="text-[#6b6560] text-xs tracking-widest mb-3 uppercase font-medium">
               {section.detail}
@@ -98,7 +98,7 @@ export default function HomePage() {
       {/* Rule block */}
       <div className="mt-16 border border-[#ddd5cc] p-8 bg-[#faf7f4]" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
         <div className="text-[#6b6560] text-xs tracking-widest mb-6 uppercase font-medium">Règles fondamentales</div>
-        <div className="grid grid-cols-3 gap-8 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 text-sm">
           <div>
             <div className="text-[#1a1a18] mb-2 font-bold tracking-wider uppercase text-xs">Score</div>
             <div className="text-[#6b6560] leading-relaxed">

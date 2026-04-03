@@ -35,13 +35,13 @@ export function Nav() {
             </span>
           </Link>
 
-          {/* Nav links — visible on all sizes, compact on mobile */}
-          <div className="flex items-center">
+          {/* Nav links */}
+          <div className="flex items-center overflow-x-auto">
             {NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-xs tracking-widest px-3 sm:px-5 py-2 uppercase font-medium transition-colors ${
+                className={`shrink-0 text-xs tracking-widest px-2 sm:px-4 py-2 uppercase font-medium transition-colors ${
                   pathname === item.href
                     ? "text-[#b84a30] font-bold"
                     : "text-[#6b6560] hover:text-[#1a1a18]"
