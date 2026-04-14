@@ -28,7 +28,7 @@ const RISK_THRESHOLD = 5; // combined risk above this requires a STABILIZER in t
 
 // ─── Pair Validation ─────────────────────────────────────────────────────────
 
-export function isValidPair(a: Card, b: Card): boolean {
+export function isValidPair(a: Card, b: Card, minTension: number = MIN_TENSION): boolean {
   if (a.id === b.id) return false;
   // Different natures — crossing boundaries is the point
   if (a.nature === b.nature) return false;
@@ -47,7 +47,7 @@ export function isValidPair(a: Card, b: Card): boolean {
   // — high combined risk requires an anchor
   if (a.risk + b.risk > RISK_THRESHOLD && !hasStabilizer) return false;
   // Minimum tension — forces friction, rejects two safe same-energy cards
-  if (computeTension([a, b]) < MIN_TENSION) return false;
+  if (computeTension([a, b]) < minTension) return false;
   return true;
 }
 
@@ -290,12 +290,20 @@ export function curate(profile: CurationProfile): CurationPair[] {
       (c.role === "STABILIZER" || totalScore(c) >= 8)
   );
 
+  // With low risk tolerance, card risks are small so the tension ceiling is structurally lower.
+  // Scale the minimum tension threshold to avoid producing zero results for Faible profiles.
+  // risk_tolerance=1: max achievable tension ≈ 3 (sum_risk=2 + variance_max=1), use 2
+  // risk_tolerance=2: moderate pairs available, use 4
+  // risk_tolerance=3: full pool, use standard MIN_TENSION=5
+  const effectiveMinTension =
+    profile.risk_tolerance === 1 ? 2 : profile.risk_tolerance === 2 ? 4 : MIN_TENSION;
+
   const pairs: CurationPair[] = [];
   for (let i = 0; i < eligible.length; i++) {
     for (let j = i + 1; j < eligible.length; j++) {
       const c1 = eligible[i];
       const c2 = eligible[j];
-      if (!isValidPair(c1, c2)) continue;
+      if (!isValidPair(c1, c2, effectiveMinTension)) continue;
       pairs.push({
         card1: c1,
         card2: c2,
