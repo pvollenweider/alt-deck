@@ -20,9 +20,13 @@ function getRecentlyUsed(): string[] {
 
 function pushRecentlyUsed(ids: string[]) {
   if (typeof window === "undefined") return;
-  const current = getRecentlyUsed();
-  const updated = [...ids, ...current.filter((id) => !ids.includes(id))].slice(0, MAX_RECENT);
-  localStorage.setItem(RECENTLY_USED_KEY, JSON.stringify(updated));
+  try {
+    const current = getRecentlyUsed();
+    const updated = [...ids, ...current.filter((id) => !ids.includes(id))].slice(0, MAX_RECENT);
+    localStorage.setItem(RECENTLY_USED_KEY, JSON.stringify(updated));
+  } catch {
+    // localStorage unavailable — skip recency tracking
+  }
 }
 
 export default function GeneratePage() {
@@ -34,10 +38,11 @@ export default function GeneratePage() {
   const handleGenerate = useCallback(() => {
     const recent = getRecentlyUsed();
     const session = generateSession(recent);
+    setResult(null);
+    setThirdCard(null);
     if (session) {
       pushRecentlyUsed([session.card1.id, session.card2.id]);
       setResult(session);
-      setThirdCard(null);
     }
     setGenerated(true);
   }, []);
@@ -55,23 +60,36 @@ export default function GeneratePage() {
       ? [result.card1, result.card2, thirdCard]
       : [result.card1, result.card2];
     const prepTime = computePreparationTime(cards);
-    sessionStorage.setItem(
-      "altdeck_active_session",
-      JSON.stringify({
-        card1: result.card1,
-        card2: result.card2,
-        ...(thirdCard ? { card3: thirdCard } : {}),
-        prepTime,
-        phase: "IDLE",
-        phaseEndTime: null,
-        phaseDuration: null,
-      })
-    );
+    try {
+      sessionStorage.setItem(
+        "altdeck_active_session",
+        JSON.stringify({
+          card1: result.card1,
+          card2: result.card2,
+          ...(thirdCard ? { card3: thirdCard } : {}),
+          prepTime,
+          phase: "IDLE",
+          phaseEndTime: null,
+          phaseDuration: null,
+        })
+      );
+    } catch {
+      return;
+    }
     router.push("/session");
   };
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      {/* Persistent live region — announces result state to screen readers */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {result
+          ? `Session générée : Carte 1 ${result.card1.nature} (score ${result.score1}/15) et Carte 2 ${result.card2.nature} (score ${result.score2}/15), tension ${result.tension.toFixed(1)}/10.`
+          : generated && !result
+          ? "Aucune paire valide trouvée."
+          : ""}
+      </div>
+
       {/* Header */}
       <div className="mb-6 sm:mb-8">
         <div className="text-[#6b6560] text-xs tracking-widest mb-2 uppercase font-medium">
@@ -94,7 +112,10 @@ export default function GeneratePage() {
 
       {/* Result */}
       {generated && !result && (
-        <div className="border border-[#b84a30] p-6 text-[#b84a30] text-sm tracking-wider bg-[#fdf2ef]">
+        <div
+          className="border border-[#b84a30] p-6 text-[#b84a30] text-sm tracking-wider bg-[#faf7f4]"
+          role="alert"
+        >
           AUCUNE PAIRE VALIDE TROUVÉE. Cela ne devrait pas arriver. Vérifier les données des cartes.
         </div>
       )}
@@ -105,8 +126,8 @@ export default function GeneratePage() {
           <div className="border border-[#ddd5cc] p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-[#faf7f4]">
             <div className="flex items-center gap-4">
               <span className="text-[#6b6560] text-xs tracking-widest uppercase">Validité</span>
-              <span className="text-[#2d7a53] text-sm font-bold tracking-wider">
-                ✓ VALIDE
+              <span className="text-[#1a1a18] text-sm font-bold tracking-wider">
+                <span aria-hidden="true">✓ </span>VALIDE
               </span>
             </div>
             <div className="flex flex-wrap gap-4 text-xs text-[#6b6560] tracking-wider">
@@ -164,7 +185,7 @@ export default function GeneratePage() {
               className="text-sm tracking-widest px-6 sm:px-8 py-3 bg-[#b84a30] text-white font-bold hover:bg-[#8c3622] uppercase transition-colors"
               style={{ borderRadius: "2px" }}
             >
-              LANCER LA SESSION →
+              LANCER LA SESSION <span aria-hidden="true">→</span>
             </button>
             {!thirdCard && (
               <button

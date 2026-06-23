@@ -25,12 +25,23 @@ export default function DeckPage() {
         <div className="w-10 h-0.5 bg-[#b84a30] mt-2" />
       </div>
 
+      {/* Persistent live region — announces filter result count to screen readers */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {filtered.length} carte{filtered.length !== 1 ? "s" : ""} affichée{filtered.length !== 1 ? "s" : ""}
+        {activeNature !== "ALL" ? `, nature ${activeNature}` : ""}
+      </div>
+
       {/* Filter bar */}
-      <div className="flex overflow-x-auto mb-8 sm:mb-10 border border-[#ddd5cc] w-fit max-w-full bg-[#faf7f4]">
+      <div
+        role="group"
+        aria-label="Filtrer par nature"
+        className="flex overflow-x-auto mb-8 sm:mb-10 border border-[#ddd5cc] w-fit max-w-full bg-[#faf7f4]"
+      >
         {NATURES.map((n) => (
           <button
             key={n}
             onClick={() => setActiveNature(n)}
+            aria-pressed={activeNature === n}
             className={`shrink-0 px-3 sm:px-5 py-2 text-xs tracking-widest border-r border-[#ddd5cc] last:border-r-0 font-medium uppercase transition-colors ${
               activeNature === n
                 ? n === "ALL"

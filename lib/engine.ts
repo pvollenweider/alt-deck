@@ -201,7 +201,7 @@ export function generateThirdCard(
 
 // ─── Session Phases ──────────────────────────────────────────────────────────
 
-export type SessionPhase = "IDLE" | "REVEAL" | "PREPARATION" | "LOCK" | "PLAYING";
+export type SessionPhase = "IDLE" | "REVEAL" | "PREPARATION" | "LOCK" | "PLAYING" | "COMPLETE";
 
 export interface StoredSession {
   card1: Card;

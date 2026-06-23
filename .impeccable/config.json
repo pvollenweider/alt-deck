@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0,0,0,0.06)",
+        "reason": "ambient-low shadow token documented in .impeccable/design.json",
+        "createdAt": "2026-06-23T19:02:01.755Z"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0,0,0,0.08)",
+        "reason": "ambient-card shadow token documented in .impeccable/design.json",
+        "createdAt": "2026-06-23T19:02:01.798Z"
+      },
+      {
+        "rule": "side-tab",
+        "value": "border-l-4",
+        "reason": "Functional category encoding — documented exception in DESIGN.md",
+        "createdAt": "2026-06-23T19:02:01.841Z"
+      }
+    ]
+  }
+}

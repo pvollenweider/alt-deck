@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-23T00:00:00Z",
+  "title": "Design System: ALT-DECK",
+  "extensions": {
+    "colorMeta": {
+      "terracotta":      { "role": "primary",   "displayName": "Terracotta",    "canonical": "#b84a30", "tonalRamp": ["#3d1409","#5c1e0d","#7a2811","#8c3622","#b84a30","#d0694f","#e09080","#f5cdc5"] },
+      "terracotta-deep": { "role": "primary",   "displayName": "Terracotta Deep", "canonical": "#8c3622", "tonalRamp": ["#3d1409","#5c1e0d","#7a2811","#8c3622","#b84a30","#d0694f","#e09080","#f5cdc5"] },
+      "cobalt":          { "role": "secondary", "displayName": "Cobalt",         "canonical": "#2d5fa0", "tonalRamp": ["#0d1f3d","#162e5a","#1f4080","#2d5fa0","#4d7fc0","#7da0d5","#adc4e8","#ddeaf8"] },
+      "forest":          { "role": "tertiary",  "displayName": "Forest",         "canonical": "#2d7a53", "tonalRamp": ["#0d2a1c","#174030","#1f5840","#2d7a53","#3e9e6e","#6cbf90","#9dd8b5","#d0f0e0"] },
+      "ochre":           { "role": "tertiary",  "displayName": "Ochre",          "canonical": "#9a7820", "tonalRamp": ["#332808","#4f3e0c","#6e5412","#9a7820","#c09c38","#d4b86a","#e4d09a","#f4ecd5"] },
+      "ink":             { "role": "neutral",   "displayName": "Ink",            "canonical": "#1a1a18", "tonalRamp": ["#0a0a09","#1a1a18","#2f2f2c","#4f4f49","#6b6560","#999490","#c5c2be","#e8e6e3"] },
+      "ink-mid":         { "role": "neutral",   "displayName": "Ink Mid",        "canonical": "#4f4f49", "tonalRamp": ["#0a0a09","#1a1a18","#2f2f2c","#4f4f49","#6b6560","#999490","#c5c2be","#e8e6e3"] },
+      "ink-muted":       { "role": "neutral",   "displayName": "Ink Muted",      "canonical": "#6b6560", "tonalRamp": ["#0a0a09","#1a1a18","#2f2f2c","#4f4f49","#6b6560","#999490","#c5c2be","#e8e6e3"] },
+      "surface":         { "role": "neutral",   "displayName": "Surface",        "canonical": "#faf7f4", "tonalRamp": ["#2a2724","#44403c","#66625d","#8e8a85","#b8b4ae","#d8d5d0","#ece9e5","#faf7f4"] },
+      "ground":          { "role": "neutral",   "displayName": "Ground",         "canonical": "#f5f0eb", "tonalRamp": ["#2a2724","#44403c","#66625d","#8e8a85","#b8b4ae","#d4d0c8","#e8e4dc","#f5f0eb"] },
+      "border":          { "role": "neutral",   "displayName": "Border",         "canonical": "#ddd5cc", "tonalRamp": ["#2a2724","#44403c","#66625d","#8e8a85","#b8b4ae","#d8d5d0","#ece9e5","#faf7f4"] }
+    },
+    "typographyMeta": {
+      "display":  { "displayName": "Display",  "purpose": "Page hero title. One per page. ALT-DECK mark in monospace bold." },
+      "headline": { "displayName": "Headline", "purpose": "Card titles. Must read at 3m on a projector. Monospace bold, tracked uppercase." },
+      "title":    { "displayName": "Title",    "purpose": "Section prose headers, card description lead." },
+      "body":     { "displayName": "Body",     "purpose": "Card rules text, context prose. 65ch max-width." },
+      "label":    { "displayName": "Label",    "purpose": "Nav items, category badges, score labels, axis names. Always uppercase." }
+    },
+    "shadows": [
+      { "name": "ambient-low",  "value": "0 2px 12px rgba(0,0,0,0.05)", "purpose": "Stat blocks and grid containers. Barely perceptible; helps on projectors." },
+      { "name": "ambient-card", "value": "0 4px 16px rgba(0,0,0,0.06)", "purpose": "Individual cards. Slight lift for distance readability." },
+      { "name": "nav-ambient",  "value": "0 0 18px rgba(0,0,0,0.07)",  "purpose": "Navigation bar. One persistent lifted surface." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.25, 0, 0, 1)", "purpose": "Default for state transitions (color, border). 150ms." },
+      { "name": "duration-fast", "value": "150ms", "purpose": "Button hover, nav link state changes." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Default action. Ink background, surface text. Terracotta on hover.",
+      "html": "<button class=\"ds-btn-primary\">GÉNÉRER</button>",
+      "css": ".ds-btn-primary { background: #1a1a18; color: #faf7f4; padding: 10px 24px; font-family: Poppins, Arial, sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: none; border-radius: 0; cursor: pointer; transition: background 150ms cubic-bezier(0.25,0,0,1); } .ds-btn-primary:hover { background: #b84a30; } .ds-btn-primary:focus-visible { outline: 2px solid #b84a30; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action. Transparent, muted text, thin border.",
+      "html": "<button class=\"ds-btn-ghost\">ANNULER</button>",
+      "css": ".ds-btn-ghost { background: transparent; color: #6b6560; padding: 8px 16px; font-family: Poppins, Arial, sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid #ddd5cc; border-radius: 0; cursor: pointer; transition: color 150ms, border-color 150ms; } .ds-btn-ghost:hover { color: #1a1a18; border-color: #4f4f49; } .ds-btn-ghost:focus-visible { outline: 2px solid #b84a30; outline-offset: 2px; }"
+    },
+    {
+      "name": "Nature Badge",
+      "kind": "chip",
+      "refersTo": "badge-nature",
+      "description": "Category signal chip. Nature color background, white text. Category-exclusive.",
+      "html": "<span class=\"ds-badge-nature ds-badge-structural\">STRUCTURAL</span>",
+      "css": ".ds-badge-nature { display: inline-block; font-family: Poppins, Arial, sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #fff; padding: 4px 8px; border-radius: 2px; } .ds-badge-structural { background: #b84a30; } .ds-badge-cognitive { background: #2d5fa0; } .ds-badge-sonic { background: #2d7a53; } .ds-badge-physical { background: #9a7820; }"
+    },
+    {
+      "name": "Role Badge",
+      "kind": "chip",
+      "refersTo": "badge-role",
+      "description": "Role label chip. Ground background, muted text, thin border.",
+      "html": "<span class=\"ds-badge-role\">CONTRAINTE</span>",
+      "css": ".ds-badge-role { display: inline-block; font-family: Poppins, Arial, sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #6b6560; background: #f5f0eb; border: 1px solid #ddd5cc; padding: 4px 8px; border-radius: 2px; }"
+    },
+    {
+      "name": "Card (Default)",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Constraint card. Left border encodes nature category. Square corners, ambient shadow.",
+      "html": "<div class=\"ds-card ds-card-structural\"><div class=\"ds-card-title\">SILENCE_PARTIEL</div><p class=\"ds-card-desc\">Une voix au moins doit rester silencieuse à tout moment.</p></div>",
+      "css": ".ds-card { background: #faf7f4; border: 1px solid #ddd5cc; border-left-width: 4px; padding: 20px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); } .ds-card-structural { border-left-color: #b84a30; } .ds-card-cognitive { border-left-color: #2d5fa0; } .ds-card-sonic { border-left-color: #2d7a53; } .ds-card-physical { border-left-color: #9a7820; } .ds-card-title { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 1.25rem; font-weight: 700; letter-spacing: 0.1em; color: #1a1a18; text-transform: uppercase; } .ds-card-desc { font-family: Lora, Georgia, serif; font-size: 0.875rem; line-height: 1.6; color: #4f4f49; margin: 0; }"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": "button-ghost",
+      "description": "Horizontal nav bar. Surface background, tracked uppercase links.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link\" href=\"#\">DECK</a><a class=\"ds-nav-link ds-nav-active\" href=\"#\">SESSION</a><a class=\"ds-nav-link\" href=\"#\">GÉNÉRER</a></nav>",
+      "css": ".ds-nav { background: #faf7f4; border-bottom: 1px solid #ddd5cc; box-shadow: 0 0 18px rgba(0,0,0,0.07); display: flex; align-items: center; gap: 0; padding: 0 16px; height: 56px; } .ds-nav-link { font-family: Poppins, Arial, sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: #6b6560; text-decoration: none; padding: 8px 16px; transition: color 150ms; } .ds-nav-link:hover { color: #1a1a18; } .ds-nav-active { color: #b84a30; font-weight: 700; } .ds-nav-link:focus-visible { outline: 2px solid #b84a30; outline-offset: 2px; }"
+    },
+    {
+      "name": "Stat Grid Cell",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Ledger-style stat block cell. Ground-divided bordered grid, ambient shadow.",
+      "html": "<div class=\"ds-stat-grid\"><div class=\"ds-stat-cell\"><div class=\"ds-stat-label\">Total cartes</div><div class=\"ds-stat-value\">45</div></div><div class=\"ds-stat-cell\"><div class=\"ds-stat-label\">Score moy.</div><div class=\"ds-stat-value\">8<span class=\"ds-stat-unit\">/15</span></div></div></div>",
+      "css": ".ds-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); border: 1px solid #ddd5cc; background: #faf7f4; box-shadow: 0 2px 12px rgba(0,0,0,0.05); } .ds-stat-cell { padding: 20px 24px; border-right: 1px solid #ddd5cc; } .ds-stat-cell:last-child { border-right: none; } .ds-stat-label { font-family: Poppins, Arial, sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #6b6560; margin-bottom: 4px; } .ds-stat-value { font-family: Poppins, Arial, sans-serif; font-size: 1.875rem; font-weight: 700; color: #1a1a18; } .ds-stat-unit { font-size: 1.125rem; color: #6b6560; font-weight: 400; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Rehearsal Room",
+    "overview": "ALT-DECK's visual language is that of a space designed for work, not presentation. Bare walls. A music stand. No decoration that doesn't serve the session. The interface is spare, utilitarian, and confident — a professional working surface that treats its users as capable adults operating under deliberate pressure.\n\nColor is structural, not decorative. The warm ground and off-white surface don't carry warmth as a style choice — they are the neutral room. The terracotta accent functions like a highlighter pen on a score: it marks what matters. The four nature colors are functional category signals, not visual embellishment.\n\nType is the primary design material. Card titles render in monospace at large weights; labels run in tight tracked uppercase. The Poppins + Lora pairing separates two registers: the systematic and the human.",
+    "keyCharacteristics": [
+      "Zero-radius everywhere. The interface has edges.",
+      "Uppercase tracking (0.15em–0.20em) for all labels and category signals.",
+      "Monospace for card titles — the constraint as notation.",
+      "Subtle shadow vocabulary (ambient only) — surfaces float just enough to read at distance.",
+      "Left-border on cards is functional (nature color signal), not decorative.",
+      "Color restricted to category signals and one accent. Nothing else competes."
+    ],
+    "rules": [
+      { "name": "The One Voice Rule",       "body": "Terracotta appears on ≤15% of any screen. Its presence marks active state, danger, or the primary accent; its scarcity is the system's authority. Do not use it for decoration.", "section": "colors" },
+      { "name": "The Category Rule",        "body": "The four nature colors are reserved for card category signals only. Re-using them elsewhere corrupts the categorical encoding.", "section": "colors" },
+      { "name": "The Mono Rule",            "body": "Card titles always render in monospace. The constraint is notation. Prose fonts are for descriptions and rules; the title is the code.", "section": "typography" },
+      { "name": "The Uppercase Ceiling",    "body": "Uppercase tracking applies only to labels (12px and below) and display headings. Body copy and Lora descriptions are sentence case. All-caps body text fails at distance.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "No surface adds a shadow to signal status, hierarchy, or importance. Shadows exist only where distance-readability requires it.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use zero border-radius everywhere. The square edge is a deliberate system choice.",
+      "Do set card titles in monospace. They are notation, not prose.",
+      "Do reserve terracotta for active states, risk signals, and the primary accent mark only.",
+      "Do use the four nature colors for category signals only.",
+      "Do set all labels and nav items in uppercase with 0.15em–0.20em tracking at 0.75rem.",
+      "Do use Lora for card descriptions and constraint prose.",
+      "Do test card text at 3m distance.",
+      "Do use tonal layering (surface vs. ground) to separate surfaces.",
+      "Do include outline: 2px solid #b84a30; outline-offset: 2px on all interactive focus states."
+    ],
+    "donts": [
+      "Don't use a SaaS / Notion-style aesthetic.",
+      "Don't use music streaming UI patterns.",
+      "Don't use academic / institutional formatting.",
+      "Don't apply border-radius above 2px to any component.",
+      "Don't add color for decoration.",
+      "Don't use gradient text.",
+      "Don't use glassmorphism.",
+      "Don't add new sans-serif fonts.",
+      "Don't use side-stripe borders (border-left or border-right > 1px) for decoration.",
+      "Don't soften copy. The interface is declarative."
+    ]
+  }
+}

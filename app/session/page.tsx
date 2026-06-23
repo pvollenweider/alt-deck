@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Card, totalScore, overallDifficulty, NATURE_BG, NATURE_BORDER, ROLE_LABELS } from "@/lib/cards";
+import { Card, totalScore, overallDifficulty, NATURE_BG, NATURE_BORDER, NATURE_DOT, ROLE_LABELS } from "@/lib/cards";
 import {
   generateSession,
   generateThirdCard,
@@ -31,15 +31,16 @@ const PHASE_META: Record<
   SessionPhase,
   { label: string; subtitle: string; color: string }
 > = {
-  IDLE:        { label: "PRÊT",          subtitle: "En attente de démarrage",   color: "#6b6560" },
-  REVEAL:      { label: "RÉVÉLATION",    subtitle: "Découverte des contraintes", color: "#2d5fa0" },
-  PREPARATION: { label: "PRÉPARATION",   subtitle: "Installation technique",     color: "#9a7820" },
-  LOCK:        { label: "VERROUILLAGE",  subtitle: "Dernière mise en place",     color: "#b84a30" },
-  PLAYING:     { label: "EN COURS",      subtitle: "Session active",             color: "#2d7a53" },
+  IDLE:        { label: "PRÊT",            subtitle: "En attente de démarrage",   color: "#6b6560" },
+  REVEAL:      { label: "RÉVÉLATION",      subtitle: "Découverte des contraintes", color: "#2d5fa0" },
+  PREPARATION: { label: "PRÉPARATION",     subtitle: "Installation technique",     color: "#9a7820" },
+  LOCK:        { label: "VERROUILLAGE",    subtitle: "Dernière mise en place",     color: "#b84a30" },
+  PLAYING:     { label: "EN COURS",        subtitle: "Session active",             color: "#2d7a53" },
+  COMPLETE:    { label: "TERMINÉE",        subtitle: "Session complète",           color: "#1a1a18" },
 };
 
 function nextPhase(phase: SessionPhase): SessionPhase | null {
-  const order: SessionPhase[] = ["IDLE", "REVEAL", "PREPARATION", "LOCK", "PLAYING"];
+  const order: SessionPhase[] = ["IDLE", "REVEAL", "PREPARATION", "LOCK", "PLAYING", "COMPLETE"];
   const i = order.indexOf(phase);
   return i < order.length - 1 ? order[i + 1] : null;
 }
@@ -52,7 +53,11 @@ function phaseDurationSec(phase: SessionPhase, prepTime: number): number {
 }
 
 function saveSession(session: StoredSession) {
-  sessionStorage.setItem("altdeck_active_session", JSON.stringify(session));
+  try {
+    sessionStorage.setItem("altdeck_active_session", JSON.stringify(session));
+  } catch {
+    // storage unavailable — phase won't persist across refresh
+  }
 }
 
 function isValidCard(c: Card) {
@@ -124,14 +129,14 @@ function PrintView({
                 fontSize: "7.5pt", fontFamily: "monospace", textTransform: "uppercase",
                 letterSpacing: "0.14em", fontWeight: "bold",
                 backgroundColor: natureColor, color: "white",
-                padding: "2pt 6pt", borderRadius: "2pt",
+                padding: "2pt 6pt", borderRadius: "2px",
               }}>
                 {card.nature}
               </span>
               <span style={{
                 fontSize: "7.5pt", fontFamily: "monospace", textTransform: "uppercase",
                 letterSpacing: "0.12em", color: "#6b6560",
-                border: "0.5pt solid #ddd5cc", padding: "2pt 6pt", borderRadius: "2pt",
+                border: "0.5pt solid #ddd5cc", padding: "2pt 6pt", borderRadius: "2px",
               }}>
                 {ROLE_LABELS[card.role]}
               </span>
@@ -194,11 +199,17 @@ function PhaseBanner({
 
   return (
     <div className="border border-[#ddd5cc] bg-[#faf7f4] mb-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+      {/* Visually-hidden live region — separate persistent node for reliable SR announcement */}
+      <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {meta.label}
+      </span>
+
       <div className="flex items-center justify-between px-4 sm:px-6 py-3">
         <div className="flex items-center gap-3">
           <span
             className="text-xs font-bold tracking-widest px-3 py-1 text-white"
             style={{ backgroundColor: meta.color, borderRadius: "2px" }}
+            aria-hidden="true"
           >
             {meta.label}
           </span>
@@ -214,8 +225,21 @@ function PhaseBanner({
 
         <div className="flex items-center gap-3">
           {timed && (
-            <span className="text-xl font-mono font-bold text-[#1a1a18]">
+            <span
+              role="timer"
+              className="text-xl font-mono font-bold text-[#1a1a18]"
+              aria-label={`Temps restant : ${formatTime(timeLeftMs)}`}
+            >
               {formatTime(timeLeftMs)}
+            </span>
+          )}
+          {phase === "PLAYING" && (
+            <span
+              className="text-xs font-bold tracking-widest px-3 py-1"
+              style={{ color: "#2d7a53" }}
+              aria-label="Session en cours"
+            >
+              <span aria-hidden="true">● </span>LIVE
             </span>
           )}
           {phase === "REVEAL" && (
@@ -223,6 +247,7 @@ function PhaseBanner({
               onClick={onAdvance}
               className="text-xs tracking-widest px-4 py-2 border border-[#2d5fa0] text-[#2d5fa0] hover:bg-[#2d5fa0] hover:text-white uppercase transition-colors bg-[#faf7f4]"
               style={{ borderRadius: "2px" }}
+              aria-label="Passer à la préparation (Espace)"
             >
               PASSER →
             </button>
@@ -232,23 +257,23 @@ function PhaseBanner({
               onClick={onAdvance}
               className="text-xs tracking-widest px-4 py-2 border border-[#9a7820] text-[#9a7820] hover:bg-[#9a7820] hover:text-white uppercase transition-colors bg-[#faf7f4] font-bold"
               style={{ borderRadius: "2px" }}
+              aria-label="Prêt, passer au verrouillage (Espace)"
             >
               PRÊT →
             </button>
-          )}
-          {phase === "PLAYING" && (
-            <span
-              className="text-xs font-bold tracking-widest px-3 py-1"
-              style={{ color: "#2d7a53" }}
-            >
-              ● LIVE
-            </span>
           )}
         </div>
       </div>
 
       {timed && phaseDuration && (
-        <div className="h-1 bg-[#ddd5cc]">
+        <div
+          className="h-1 bg-[#ddd5cc]"
+          role="progressbar"
+          aria-valuenow={Math.round(progress)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Progression de la phase ${meta.label}`}
+        >
           <div
             className="h-1 transition-all duration-500"
             style={{ width: `${progress}%`, backgroundColor: meta.color }}
@@ -337,12 +362,17 @@ function SessionCard({ card, label }: { card: Card; label: string }) {
       </ul>
 
       <div className="flex items-center gap-3">
-        <span className="text-[#6b6560] text-xs tracking-widest uppercase">Difficulté</span>
-        <div className="flex gap-2">
+        <span className="text-[#6b6560] text-xs tracking-widest uppercase" id={`diff-label-${card.id}`}>Difficulté</span>
+        <div
+          className="flex gap-2"
+          role="img"
+          aria-label={`Difficulté : ${diff} sur 5`}
+        >
           {[1, 2, 3, 4, 5].map((d) => (
             <div
               key={d}
-              className={`w-3 h-3 rounded-full ${d <= diff ? "bg-[#b84a30]" : "bg-[#ddd5cc]"}`}
+              className={`w-3 h-3 rounded-full ${d <= diff ? NATURE_DOT[card.nature] : "bg-[#ddd5cc]"}`}
+              aria-hidden="true"
             />
           ))}
         </div>
@@ -351,7 +381,7 @@ function SessionCard({ card, label }: { card: Card; label: string }) {
       <div className="border-t border-[#ddd5cc] pt-4 sm:pt-5 flex items-center justify-between">
         <div className="flex gap-4 sm:gap-6 text-xs text-[#6b6560]">
           <span>STR <span className="text-[#4f4f49] font-semibold">{card.difficulty.structural}</span></span>
-          <span>DIS <span className="text-[#4f4f49] font-semibold">{card.difficulty.disorientation}</span></span>
+          <span>DÉS <span className="text-[#4f4f49] font-semibold">{card.difficulty.disorientation}</span></span>
           <span>PER <span className="text-[#4f4f49] font-semibold">{card.difficulty.performance}</span></span>
         </div>
         <div className="text-sm">
@@ -377,6 +407,10 @@ export default function SessionPage() {
   const [session, setSession] = useState<StoredSession | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [timeLeftMs, setTimeLeftMs] = useState<number>(0);
+  const [replaceConfirmPending, setReplaceConfirmPending] = useState(false);
+  const [thirdCardUnavailable, setThirdCardUnavailable] = useState(false);
+  const [quickGenerateFailed, setQuickGenerateFailed] = useState(false);
+  const sessionRef = useRef<StoredSession | null>(null);
 
   // Load session from sessionStorage
   useEffect(() => {
@@ -385,7 +419,6 @@ export default function SessionPage() {
       try {
         const parsed = JSON.parse(stored) as StoredSession;
         if (isValidCard(parsed.card1) && isValidCard(parsed.card2)) {
-          // Legacy sessions without phase data: add defaults
           if (!parsed.phase) {
             parsed.phase = "IDLE";
             parsed.phaseEndTime = null;
@@ -398,6 +431,7 @@ export default function SessionPage() {
             }
           }
           setSession(parsed);
+          sessionRef.current = parsed;
         } else {
           sessionStorage.removeItem("altdeck_active_session");
         }
@@ -408,32 +442,57 @@ export default function SessionPage() {
     setLoaded(true);
   }, []);
 
-  // Countdown timer
+  // Keep ref in sync so timer closure always reads current session
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
+
+  // Countdown timer — uses ref to avoid stale closure
   useEffect(() => {
     if (!session || session.phaseEndTime === null) return;
 
     const tick = () => {
-      const left = Math.max(0, session.phaseEndTime! - Date.now());
+      const current = sessionRef.current;
+      if (!current || current.phaseEndTime === null) return;
+      const left = Math.max(0, current.phaseEndTime - Date.now());
       setTimeLeftMs(left);
       if (left === 0) {
         clearInterval(id);
-        advancePhase(session);
+        advancePhaseFrom(current);
       }
     };
 
-    // Immediate calculation
     setTimeLeftMs(Math.max(0, session.phaseEndTime - Date.now()));
     const id = setInterval(tick, 250);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.phase, session?.phaseEndTime]);
 
+  // Keyboard shortcut: Spacebar advances phase when no interactive element is focused
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.code !== "Space") return;
+    const target = e.target as HTMLElement;
+    if (target.closest("button, input, textarea, select, [contenteditable]")) return;
+    e.preventDefault();
+    const current = sessionRef.current;
+    if (!current) return;
+    if (current.phase === "IDLE" || current.phase === "REVEAL" || current.phase === "PREPARATION") {
+      advancePhaseFrom(current);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
+
   function updateSession(updated: StoredSession) {
     saveSession(updated);
     setSession(updated);
+    sessionRef.current = updated;
   }
 
-  function advancePhase(current: StoredSession) {
+  function advancePhaseFrom(current: StoredSession) {
     const next = nextPhase(current.phase);
     if (!next) return;
     const duration = phaseDurationSec(next, current.prepTime);
@@ -448,18 +507,22 @@ export default function SessionPage() {
 
   function handleStartSession() {
     if (!session) return;
-    advancePhase(session);
+    advancePhaseFrom(session);
   }
 
   function handleAdvancePhase() {
     if (!session) return;
-    advancePhase(session);
+    advancePhaseFrom(session);
   }
 
   function handleAddThirdCard() {
     if (!session) return;
     const card3 = generateThirdCard(session.card1, session.card2, []);
-    if (!card3) return;
+    if (!card3) {
+      setThirdCardUnavailable(true);
+      return;
+    }
+    setThirdCardUnavailable(false);
     const cards: Card[] = [session.card1, session.card2, card3];
     const updated: StoredSession = {
       ...session,
@@ -471,6 +534,7 @@ export default function SessionPage() {
 
   function handleRemoveThirdCard() {
     if (!session) return;
+    setThirdCardUnavailable(false);
     const { card3: _removed, ...rest } = session;
     const updated: StoredSession = {
       ...rest,
@@ -479,9 +543,13 @@ export default function SessionPage() {
     updateSession(updated);
   }
 
-  function handleQuickGenerate() {
+  function doQuickGenerate() {
     const result = generateSession([]);
-    if (!result) return;
+    if (!result) {
+      setQuickGenerateFailed(true);
+      return;
+    }
+    setQuickGenerateFailed(false);
     const cards: Card[] = [result.card1, result.card2];
     const newSession: StoredSession = {
       card1: result.card1,
@@ -492,6 +560,16 @@ export default function SessionPage() {
       phaseDuration: null,
     };
     updateSession(newSession);
+    setReplaceConfirmPending(false);
+    setThirdCardUnavailable(false);
+  }
+
+  function handleQuickGenerate() {
+    if (!session || session.phase === "IDLE" || session.phase === "COMPLETE") {
+      doQuickGenerate();
+    } else {
+      setReplaceConfirmPending(true);
+    }
   }
 
   // ─── Loading state ─────────────────────────────────────────────────────────
@@ -499,7 +577,9 @@ export default function SessionPage() {
   if (!loaded) {
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="text-[#6b6560] text-xs tracking-widest">CHARGEMENT...</div>
+        <div className="text-[#6b6560] text-xs tracking-widest" role="status" aria-label="Chargement de la session">
+          CHARGEMENT...
+        </div>
       </div>
     );
   }
@@ -521,9 +601,14 @@ export default function SessionPage() {
           <div className="text-[#6b6560] text-xs tracking-wider mb-8 sm:mb-10 max-w-md mx-auto leading-relaxed">
             Aller sur GÉNÉRER ou CURATION pour créer une session, ou générer rapidement ici.
           </div>
+          {quickGenerateFailed && (
+            <div className="text-[#b84a30] text-xs tracking-wider uppercase mb-6" role="alert">
+              Génération impossible — vérifier les données des cartes.
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
-              onClick={handleQuickGenerate}
+              onClick={doQuickGenerate}
               className="text-sm tracking-widest px-8 sm:px-10 py-3 bg-[#b84a30] text-white font-bold hover:bg-[#8c3622] uppercase transition-colors"
               style={{ borderRadius: "2px" }}
             >
@@ -553,10 +638,11 @@ export default function SessionPage() {
     ? [session.card1, session.card2, session.card3]
     : [session.card1, session.card2];
   const tension = computeTension(allCards);
+  const isActive = session.phase !== "IDLE" && session.phase !== "COMPLETE";
 
   return (
     <>
-      {/* ── Layout PDF (caché à l'écran, visible en impression) ─────────── */}
+      {/* ── Layout PDF ──────────────────────────────────────────────────── */}
       <div className="print-only" style={{ padding: "0" }}>
         <PrintView session={session} allCards={allCards} tension={tension} />
       </div>
@@ -564,143 +650,229 @@ export default function SessionPage() {
       {/* ── Interface écran ───────────────────────────────────────────────── */}
       <div className="no-print max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
-      {/* ── Screen header ─────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between gap-4 mb-6 sm:mb-8">
-        <div>
-          <div className="text-[#6b6560] text-xs tracking-widest mb-2 uppercase font-medium">Vue performance</div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-widest text-[#1a1a18] font-mono">SESSION</h1>
-          <div className="w-10 h-0.5 bg-[#b84a30] mt-2" />
-        </div>
-        {/* Right column: two rows on mobile, one row on desktop */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 shrink-0">
-          {/* Row 1: session management */}
-          <div className="flex items-center gap-2 flex-wrap justify-end sm:justify-start">
-            <div className="text-[#6b6560] text-xs tracking-widest px-3 py-2 border border-[#ddd5cc] bg-[#faf7f4] uppercase whitespace-nowrap">
-              {totalLoad}/{maxLoad}
-            </div>
-            {session.phase === "IDLE" && !session.card3 && (
-              <button
-                onClick={handleAddThirdCard}
-                className="text-xs tracking-widest px-3 sm:px-5 py-2 border border-[#9a7820] text-[#9a7820] hover:bg-[#9a7820] hover:text-white uppercase transition-colors bg-[#faf7f4] font-bold whitespace-nowrap"
-                style={{ borderRadius: "2px" }}
-              >
-                + 3ÈME
-              </button>
-            )}
-            {session.phase === "IDLE" && session.card3 && (
-              <button
-                onClick={handleRemoveThirdCard}
-                className="text-xs tracking-widest px-3 sm:px-5 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#b84a30] hover:border-[#b84a30] uppercase transition-colors bg-[#faf7f4] whitespace-nowrap"
-                style={{ borderRadius: "2px" }}
-              >
-                RETIRER
-              </button>
-            )}
-          </div>
-          {/* Row 2: actions */}
-          <div className="flex items-center gap-2 flex-wrap justify-end sm:justify-start">
-            <button
-              onClick={() => window.print()}
-              className="text-xs tracking-widest px-3 sm:px-5 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4] whitespace-nowrap"
-              style={{ borderRadius: "2px" }}
-            >
-              PDF ↓
-            </button>
-            <button
-              onClick={() => router.push("/generate")}
-              className="text-xs tracking-widest px-3 sm:px-5 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4] whitespace-nowrap"
-              style={{ borderRadius: "2px" }}
-            >
-              NOUVELLE
-            </button>
-            <button
-              onClick={handleQuickGenerate}
-              className="text-xs tracking-widest px-3 sm:px-5 py-2 bg-[#b84a30] text-white font-bold hover:bg-[#8c3622] uppercase transition-colors whitespace-nowrap"
-              style={{ borderRadius: "2px" }}
-            >
-              ALÉATOIRE
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Phase banner */}
-      <div className="no-print">
-        <PhaseBanner
-          session={session}
-          timeLeftMs={timeLeftMs}
-          onAdvance={handleAdvancePhase}
-        />
-      </div>
-
-      {/* IDLE: start button */}
-      {session.phase === "IDLE" && (
-        <div className="border border-[#ddd5cc] bg-[#faf7f4] p-6 sm:p-8 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <div className="text-[#4f4f49] text-sm tracking-wider font-medium uppercase mb-1">
-              Prêt à démarrer
-            </div>
-            <div className="text-[#6b6560] text-xs tracking-wider">
-              Révélation 2 min · Préparation {session.prepTime} min · Verrouillage 1 min
-            </div>
-          </div>
-          <button
-            onClick={handleStartSession}
-            className="text-sm tracking-widest px-8 sm:px-10 py-3 bg-[#2d7a53] text-white font-bold hover:bg-[#1e5c3d] uppercase transition-colors whitespace-nowrap"
-            style={{ borderRadius: "2px" }}
+        {/* ── Confirmation: replace active session ────────────────────────── */}
+        {replaceConfirmPending && (
+          <div
+            className="border border-[#b84a30] bg-[#fdf2ef] p-4 sm:p-5 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+            role="alert"
           >
-            DÉMARRER LA SESSION →
-          </button>
-        </div>
-      )}
-
-      {/* PREPARATION: tech notes */}
-      {session.phase === "PREPARATION" && (
-        <div className="no-print">
-          <TechNotes cards={allCards} />
-        </div>
-      )}
-
-      {/* Session status bar */}
-      <div className="flex flex-wrap items-center gap-3 sm:gap-6 border border-[#ddd5cc] bg-[#faf7f4] px-4 sm:px-6 py-3 mb-6 text-xs tracking-wider">
-        <span className="text-[#2d7a53] font-bold uppercase">✓ Valide</span>
-        <span className="text-[#ddd5cc] hidden sm:inline">|</span>
-        <span className="text-[#6b6560]">
-          C1 : <span className="text-[#1a1a18] font-medium">{session.card1.nature}</span>{" "}
-          <span className={score1 >= 8 ? "text-[#1a1a18] font-bold" : "text-[#b84a30] font-bold"}>{score1}</span>
-        </span>
-        <span className="text-[#ddd5cc] hidden sm:inline">|</span>
-        <span className="text-[#6b6560]">
-          C2 : <span className="text-[#1a1a18] font-medium">{session.card2.nature}</span>{" "}
-          <span className={score2 >= 8 ? "text-[#1a1a18] font-bold" : "text-[#b84a30] font-bold"}>{score2}</span>
-        </span>
-        {session.card3 && score3 !== null && (
-          <>
-            <span className="text-[#ddd5cc] hidden sm:inline">|</span>
-            <span className="text-[#6b6560]">
-              C3 : <span className="text-[#1a1a18] font-medium">{session.card3.nature}</span>{" "}
-              <span className={score3 >= 8 ? "text-[#1a1a18] font-bold" : "text-[#b84a30] font-bold"}>{score3}</span>
-            </span>
-          </>
+            <div>
+              <div className="text-[#b84a30] text-xs tracking-widest uppercase font-bold mb-1">
+                Remplacer la session en cours ?
+              </div>
+              <div className="text-[#4f4f49] text-xs tracking-wider">
+                La session active sera perdue. Cette action est irréversible.
+              </div>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <button
+                onClick={() => setReplaceConfirmPending(false)}
+                className="text-xs tracking-widest px-4 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4]"
+                style={{ borderRadius: "2px" }}
+                autoFocus
+              >
+                ANNULER
+              </button>
+              <button
+                onClick={doQuickGenerate}
+                className="text-xs tracking-widest px-4 py-2 bg-[#b84a30] text-white font-bold hover:bg-[#8c3622] uppercase transition-colors"
+                style={{ borderRadius: "2px" }}
+              >
+                REMPLACER
+              </button>
+            </div>
+          </div>
         )}
-        <span className="text-[#ddd5cc] hidden sm:inline">|</span>
-        <span className="text-[#6b6560]">
-          Tension : <span className="text-[#1a1a18] font-bold">{tension.toFixed(1)}</span>
-        </span>
-        <span className="text-[#ddd5cc] hidden sm:inline">|</span>
-        <span className="text-[#6b6560]">
-          Préparation : <span className="text-[#1a1a18] font-bold">{session.prepTime} min</span>
-        </span>
-      </div>
 
-      {/* Cards */}
-      <div className={`print-cards-grid ${session.card3 ? "cols-3" : "cols-2"} grid gap-4 sm:gap-6 grid-cols-1 ${session.card3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
-        <SessionCard card={session.card1} label="CARTE 1" />
-        <SessionCard card={session.card2} label="CARTE 2" />
-        {session.card3 && <SessionCard card={session.card3} label="CARTE 3" />}
-      </div>
+        {/* ── Screen header ─────────────────────────────────────────────────── */}
+        <div className="flex items-start justify-between gap-4 mb-6 sm:mb-8">
+          <div>
+            <div className="text-[#6b6560] text-xs tracking-widest mb-2 uppercase font-medium">Vue performance</div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-widest text-[#1a1a18] font-mono">SESSION</h1>
+            <div className="w-10 h-0.5 bg-[#b84a30] mt-2" />
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 shrink-0">
+            {/* Session management */}
+            <div className="flex items-center gap-2 flex-wrap justify-end sm:justify-start">
+              <div
+                className="text-[#6b6560] text-xs tracking-widest px-3 py-2 border border-[#ddd5cc] bg-[#faf7f4] uppercase whitespace-nowrap"
+                aria-label={`Charge totale : ${totalLoad} sur ${maxLoad}`}
+              >
+                {totalLoad}/{maxLoad}
+              </div>
+              {session.phase === "IDLE" && !session.card3 && (
+                thirdCardUnavailable ? (
+                  <span className="text-xs tracking-widest px-3 sm:px-5 py-2 border border-[#ddd5cc] text-[#6b6560] uppercase bg-[#faf7f4] whitespace-nowrap opacity-60">
+                    3ÈME INDISPONIBLE
+                  </span>
+                ) : (
+                  <button
+                    onClick={handleAddThirdCard}
+                    className="text-xs tracking-widest px-3 sm:px-5 py-2 border border-[#9a7820] text-[#9a7820] hover:bg-[#9a7820] hover:text-white uppercase transition-colors bg-[#faf7f4] font-bold whitespace-nowrap"
+                    style={{ borderRadius: "2px" }}
+                  >
+                    + 3ÈME
+                  </button>
+                )
+              )}
+              {session.phase === "IDLE" && session.card3 && (
+                <button
+                  onClick={handleRemoveThirdCard}
+                  className="text-xs tracking-widest px-3 sm:px-5 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#b84a30] hover:border-[#b84a30] uppercase transition-colors bg-[#faf7f4] whitespace-nowrap"
+                  style={{ borderRadius: "2px" }}
+                >
+                  RETIRER
+                </button>
+              )}
+            </div>
+            {/* Actions */}
+            <div className="flex items-center gap-2 flex-wrap justify-end sm:justify-start">
+              <button
+                onClick={() => window.print()}
+                className="text-xs tracking-widest px-3 sm:px-5 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4] whitespace-nowrap"
+                style={{ borderRadius: "2px" }}
+              >
+                PDF ↓
+              </button>
+              {/* ALÉATOIRE only shown when not in an active session — prevents accidental replacement */}
+              {!isActive && (
+                <button
+                  onClick={handleQuickGenerate}
+                  className="text-xs tracking-widest px-3 sm:px-5 py-2 bg-[#b84a30] text-white font-bold hover:bg-[#8c3622] uppercase transition-colors whitespace-nowrap"
+                  style={{ borderRadius: "2px" }}
+                >
+                  ALÉATOIRE
+                </button>
+              )}
+              {/* During active session: ghost button triggers confirmation */}
+              {isActive && (
+                <button
+                  onClick={handleQuickGenerate}
+                  className="text-xs tracking-widest px-3 sm:px-5 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#b84a30] hover:border-[#b84a30] uppercase transition-colors bg-[#faf7f4] whitespace-nowrap"
+                  style={{ borderRadius: "2px" }}
+                  aria-label="Nouvelle session — confirmation requise"
+                >
+                  NOUVELLE
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
 
-      </div> {/* end no-print screen container */}
+        {/* Phase banner — hidden in COMPLETE state */}
+        {session.phase !== "COMPLETE" && (
+          <div className="no-print">
+            <PhaseBanner
+              session={session}
+              timeLeftMs={timeLeftMs}
+              onAdvance={handleAdvancePhase}
+            />
+          </div>
+        )}
+
+        {/* IDLE: start button */}
+        {session.phase === "IDLE" && (
+          <div className="border border-[#ddd5cc] bg-[#faf7f4] p-6 sm:p-8 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <div className="text-[#4f4f49] text-sm tracking-wider font-medium uppercase mb-1">
+                Prêt à démarrer
+              </div>
+              <div className="text-[#6b6560] text-xs tracking-wider">
+                Révélation 2 min · Préparation {session.prepTime} min · Verrouillage 1 min
+                <span className="ml-3 text-[#9b9690]">— Espace pour avancer</span>
+              </div>
+            </div>
+            <button
+              onClick={handleStartSession}
+              className="text-sm tracking-widest px-8 sm:px-10 py-3 bg-[#2d7a53] text-white font-bold hover:bg-[#1e5c3d] uppercase transition-colors whitespace-nowrap"
+              style={{ borderRadius: "2px" }}
+              aria-label="Démarrer la session (Espace)"
+            >
+              DÉMARRER →
+            </button>
+          </div>
+        )}
+
+        {/* PREPARATION: tech notes */}
+        {session.phase === "PREPARATION" && (
+          <div className="no-print">
+            <TechNotes cards={allCards} />
+          </div>
+        )}
+
+        {/* PLAYING: end-session trigger */}
+        {session.phase === "PLAYING" && (
+          <div className="no-print mb-6 flex justify-end">
+            <button
+              onClick={handleAdvancePhase}
+              className="text-xs tracking-widest px-5 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4]"
+              style={{ borderRadius: "2px" }}
+            >
+              TERMINER LA SESSION
+            </button>
+          </div>
+        )}
+
+        {/* COMPLETE: session-end state */}
+        {session.phase === "COMPLETE" && (
+          <div
+            className="border border-[#1a1a18] bg-[#faf7f4] p-6 sm:p-8 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+            role="status"
+            aria-live="polite"
+          >
+            <div>
+              <div className="text-[#1a1a18] text-xs tracking-widest uppercase font-bold mb-1">
+                Session terminée
+              </div>
+              <div className="text-[#6b6560] text-xs tracking-wider">
+                Tension {tension.toFixed(1)} · Charge {totalLoad}/{maxLoad} · {session.prepTime} min de préparation
+              </div>
+            </div>
+            <div className="flex gap-2 shrink-0 flex-wrap">
+              <button
+                onClick={() => window.print()}
+                className="text-xs tracking-widest px-4 sm:px-6 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4] whitespace-nowrap"
+                style={{ borderRadius: "2px" }}
+              >
+                PDF ↓
+              </button>
+              <button
+                onClick={() => router.push("/generate")}
+                className="text-xs tracking-widest px-4 sm:px-6 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4] whitespace-nowrap"
+                style={{ borderRadius: "2px" }}
+              >
+                GÉNÉRER
+              </button>
+              <button
+                onClick={doQuickGenerate}
+                className="text-xs tracking-widest px-4 sm:px-6 py-2 bg-[#1a1a18] text-white font-bold hover:bg-[#b84a30] uppercase transition-colors whitespace-nowrap"
+                style={{ borderRadius: "2px" }}
+              >
+                NOUVELLE SESSION →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Session status bar */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border border-[#ddd5cc] bg-[#faf7f4] px-4 sm:px-6 py-3 mb-6 text-xs tracking-wider">
+          <span className="text-[#1a1a18] font-bold uppercase">✓ Valide</span>
+          <span className="text-[#6b6560]">
+            Tension : <span className="text-[#1a1a18] font-bold">{tension.toFixed(1)}</span>
+          </span>
+          <span className="text-[#6b6560]">
+            Préparation : <span className="text-[#1a1a18] font-bold">{session.prepTime} min</span>
+          </span>
+        </div>
+
+        {/* Cards */}
+        <div className={`grid gap-4 sm:gap-6 grid-cols-1 ${session.card3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
+          <SessionCard card={session.card1} label="CARTE 1" />
+          <SessionCard card={session.card2} label="CARTE 2" />
+          {session.card3 && <SessionCard card={session.card3} label="CARTE 3" />}
+        </div>
+
+      </div>
     </>
   );
 }

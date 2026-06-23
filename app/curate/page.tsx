@@ -33,13 +33,15 @@ function SelectField<T extends string | number>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className="flex flex-col gap-2">
-      <label className="text-[#6b6560] text-xs tracking-widest uppercase font-medium">{label}</label>
+    <fieldset className="flex flex-col gap-2 border-0 p-0 m-0">
+      <legend className="text-[#6b6560] text-xs tracking-widest uppercase font-medium">{label}</legend>
       <div className="flex gap-0 border border-[#ddd5cc] bg-[#faf7f4]">
         {options.map((opt) => (
           <button
             key={String(opt.value)}
+            type="button"
             onClick={() => onChange(opt.value)}
+            aria-pressed={value === opt.value}
             className={`flex-1 px-2 sm:px-4 py-2 text-xs tracking-widest border-r border-[#ddd5cc] last:border-r-0 font-medium uppercase transition-colors ${
               value === opt.value
                 ? "bg-[#b84a30] text-white font-bold"
@@ -50,7 +52,7 @@ function SelectField<T extends string | number>({
           </button>
         ))}
       </div>
-    </div>
+    </fieldset>
   );
 }
 
@@ -61,7 +63,7 @@ export default function CuratePage() {
   const [location, setLocation] = useState("");
   const [results, setResults] = useState<CurationPair[] | null>(null);
   const [curated, setCurated] = useState(false);
-  const [thirdCards, setThirdCards] = useState<Record<string, Card | null>>({});
+  const [thirdCards, setThirdCards] = useState<Partial<Record<string, Card | null>>>({});
 
   const handleCurate = () => {
     const pairs = curate(profile);
@@ -78,7 +80,11 @@ export default function CuratePage() {
   };
 
   const handleRemoveThird = (pair: CurationPair) => {
-    setThirdCards((prev) => ({ ...prev, [pairKey(pair)]: null }));
+    setThirdCards((prev) => {
+      const next = { ...prev };
+      delete next[pairKey(pair)];
+      return next;
+    });
   };
 
   const handleLaunchSession = (pair: CurationPair) => {
@@ -87,20 +93,24 @@ export default function CuratePage() {
       ? [pair.card1, pair.card2, card3]
       : [pair.card1, pair.card2];
     const prepTime = computePreparationTime(cards);
-    sessionStorage.setItem(
-      "altdeck_active_session",
-      JSON.stringify({
-        card1: pair.card1,
-        card2: pair.card2,
-        ...(card3 ? { card3 } : {}),
-        prepTime,
-        phase: "IDLE",
-        phaseEndTime: null,
-        phaseDuration: null,
-        ...(groupName.trim() ? { groupName: groupName.trim() } : {}),
-        ...(location.trim() ? { location: location.trim() } : {}),
-      })
-    );
+    try {
+      sessionStorage.setItem(
+        "altdeck_active_session",
+        JSON.stringify({
+          card1: pair.card1,
+          card2: pair.card2,
+          ...(card3 ? { card3 } : {}),
+          prepTime,
+          phase: "IDLE",
+          phaseEndTime: null,
+          phaseDuration: null,
+          ...(groupName.trim() ? { groupName: groupName.trim() } : {}),
+          ...(location.trim() ? { location: location.trim() } : {}),
+        })
+      );
+    } catch {
+      return;
+    }
     router.push("/session");
   };
 
@@ -112,6 +122,15 @@ export default function CuratePage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      {/* Persistent live region — announces curation results to screen readers */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {curated && results !== null
+          ? results.length === 0
+            ? "Aucune paire valide pour ce profil."
+            : `${results.length} paire${results.length !== 1 ? "s" : ""} suggérée${results.length !== 1 ? "s" : ""}.`
+          : ""}
+      </div>
+
       {/* Header */}
       <div className="mb-6 sm:mb-8">
         <div className="text-[#6b6560] text-xs tracking-widest mb-2 uppercase font-medium">
@@ -123,7 +142,7 @@ export default function CuratePage() {
 
       {/* Profile form */}
       <div className="border border-[#ddd5cc] p-5 sm:p-8 mb-8 sm:mb-10 bg-[#faf7f4]" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <div className="text-[#6b6560] text-xs tracking-widest mb-5 sm:mb-6 uppercase font-medium">Profil du groupe</div>
+        <h2 className="text-[#6b6560] text-xs tracking-widest mb-5 sm:mb-6 uppercase font-medium">Profil du groupe</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <SelectField<ExperienceLevel>
             label="Niveau d'expérience"
@@ -159,43 +178,55 @@ export default function CuratePage() {
           />
 
           <div className="flex flex-col gap-2">
-            <label className="text-[#6b6560] text-xs tracking-widest uppercase font-medium">
+            <label
+              htmlFor="genre-input"
+              className="text-[#6b6560] text-xs tracking-widest uppercase font-medium"
+            >
               Genre (optionnel)
             </label>
             <input
+              id="genre-input"
               type="text"
               value={profile.genre}
               onChange={(e) => update("genre", e.target.value)}
               placeholder="ex. jazz, post-rock, électroacoustique..."
-              className="text-sm bg-[#f5f0eb] border border-[#ddd5cc] text-[#1a1a18] px-4 py-3 placeholder:text-[#6b6560] focus:border-[#1a1a18] outline-none tracking-wide"
+              className="text-sm bg-[#f5f0eb] border border-[#ddd5cc] text-[#1a1a18] px-4 py-3 placeholder:text-[#5a5450] focus:border-[#1a1a18] outline-none tracking-wide"
               style={{ borderRadius: "2px" }}
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-[#6b6560] text-xs tracking-widest uppercase font-medium">
+            <label
+              htmlFor="group-name-input"
+              className="text-[#6b6560] text-xs tracking-widest uppercase font-medium"
+            >
               Nom du groupe (optionnel)
             </label>
             <input
+              id="group-name-input"
               type="text"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="ex. Trio Vide, Ensemble X..."
-              className="text-sm bg-[#f5f0eb] border border-[#ddd5cc] text-[#1a1a18] px-4 py-3 placeholder:text-[#6b6560] focus:border-[#1a1a18] outline-none tracking-wide"
+              className="text-sm bg-[#f5f0eb] border border-[#ddd5cc] text-[#1a1a18] px-4 py-3 placeholder:text-[#5a5450] focus:border-[#1a1a18] outline-none tracking-wide"
               style={{ borderRadius: "2px" }}
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-[#6b6560] text-xs tracking-widest uppercase font-medium">
+            <label
+              htmlFor="location-input"
+              className="text-[#6b6560] text-xs tracking-widest uppercase font-medium"
+            >
               Lieu (optionnel)
             </label>
             <input
+              id="location-input"
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="ex. Studio 103, Le Lieu Unique..."
-              className="text-sm bg-[#f5f0eb] border border-[#ddd5cc] text-[#1a1a18] px-4 py-3 placeholder:text-[#6b6560] focus:border-[#1a1a18] outline-none tracking-wide"
+              className="text-sm bg-[#f5f0eb] border border-[#ddd5cc] text-[#1a1a18] px-4 py-3 placeholder:text-[#5a5450] focus:border-[#1a1a18] outline-none tracking-wide"
               style={{ borderRadius: "2px" }}
             />
           </div>
@@ -207,7 +238,7 @@ export default function CuratePage() {
             className="text-sm tracking-widest px-8 sm:px-10 py-3 bg-[#b84a30] text-white font-bold hover:bg-[#8c3622] uppercase transition-colors"
             style={{ borderRadius: "2px" }}
           >
-            ANALYSER →
+            ANALYSER <span aria-hidden="true">→</span>
           </button>
         </div>
       </div>
@@ -216,7 +247,10 @@ export default function CuratePage() {
       {curated && results !== null && (
         <div>
           {results.length === 0 ? (
-            <div className="border border-[#b84a30] p-6 text-[#b84a30] text-sm tracking-wider bg-[#fdf2ef]">
+            <div
+              className="border border-[#b84a30] p-6 text-[#b84a30] text-sm tracking-wider bg-[#faf7f4]"
+              role="alert"
+            >
               AUCUNE PAIRE VALIDE pour ce profil. Ajuster la tolérance au risque.
             </div>
           ) : (
@@ -228,12 +262,13 @@ export default function CuratePage() {
                 {results.map((pair, i) => {
                   const key = pairKey(pair);
                   const card3 = thirdCards[key];
+                  const pairNum = i + 1;
                   return (
                     <div key={key} className="border border-[#ddd5cc] p-4 sm:p-6 bg-[#faf7f4]" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
                       <div className="flex flex-col gap-3 mb-4 sm:mb-6">
                         <div className="flex items-center justify-between gap-3 flex-wrap">
                           <div className="flex items-center gap-4">
-                            <span className="text-[#6b6560] text-xs tracking-widest uppercase font-medium">Paire {i + 1}</span>
+                            <span className="text-[#6b6560] text-xs tracking-widest uppercase font-medium">Paire {pairNum}</span>
                             <span className="text-[#4f4f49] text-xs">
                               Score : {pair.rank_score.toFixed(2)} · Tension : {pair.tension.toFixed(1)}
                             </span>
@@ -243,29 +278,36 @@ export default function CuratePage() {
                           </span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                          {!card3 ? (
-                            <button
-                              onClick={() => handleAddThird(pair)}
-                              className="text-xs tracking-widest px-3 sm:px-4 py-2 border border-[#9a7820] text-[#9a7820] hover:bg-[#9a7820] hover:text-white uppercase transition-colors bg-[#faf7f4] font-bold"
-                              style={{ borderRadius: "2px" }}
-                            >
-                              + 3ÈME
-                            </button>
-                          ) : (
+                          {card3 ? (
                             <button
                               onClick={() => handleRemoveThird(pair)}
+                              aria-label={`Retirer la 3ème contrainte de la paire ${pairNum}`}
                               className="text-xs tracking-widest px-3 sm:px-4 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#b84a30] hover:border-[#b84a30] uppercase transition-colors bg-[#faf7f4]"
                               style={{ borderRadius: "2px" }}
                             >
                               RETIRER
                             </button>
+                          ) : thirdCards[key] === null ? (
+                            <span className="text-xs tracking-widest px-3 sm:px-4 py-2 border border-[#ddd5cc] text-[#6b6560] uppercase bg-[#faf7f4] opacity-50">
+                              3ÈME INDISPONIBLE
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => handleAddThird(pair)}
+                              aria-label={`Ajouter une 3ème contrainte à la paire ${pairNum}`}
+                              className="text-xs tracking-widest px-3 sm:px-4 py-2 border border-[#9a7820] text-[#9a7820] hover:bg-[#9a7820] hover:text-white uppercase transition-colors bg-[#faf7f4] font-bold"
+                              style={{ borderRadius: "2px" }}
+                            >
+                              + 3ÈME
+                            </button>
                           )}
                           <button
                             onClick={() => handleLaunchSession(pair)}
+                            aria-label={`Lancer la session pour la paire ${pairNum}`}
                             className="text-xs tracking-widest px-4 sm:px-6 py-2 bg-[#b84a30] text-white font-bold hover:bg-[#8c3622] uppercase transition-colors"
                             style={{ borderRadius: "2px" }}
                           >
-                            LANCER →
+                            LANCER <span aria-hidden="true">→</span>
                           </button>
                         </div>
                       </div>
