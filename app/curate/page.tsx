@@ -190,6 +190,7 @@ export default function CuratePage() {
               value={profile.genre}
               onChange={(e) => update("genre", e.target.value)}
               placeholder="ex. jazz, post-rock, électroacoustique..."
+              maxLength={80}
               className="text-sm bg-[#f5f0eb] border border-[#ddd5cc] text-[#1a1a18] px-4 py-3 placeholder:text-[#5a5450] focus:border-[#1a1a18] outline-none tracking-wide"
               style={{ borderRadius: "2px" }}
             />
@@ -208,6 +209,7 @@ export default function CuratePage() {
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="ex. Trio Vide, Ensemble X..."
+              maxLength={80}
               className="text-sm bg-[#f5f0eb] border border-[#ddd5cc] text-[#1a1a18] px-4 py-3 placeholder:text-[#5a5450] focus:border-[#1a1a18] outline-none tracking-wide"
               style={{ borderRadius: "2px" }}
             />
@@ -226,6 +228,7 @@ export default function CuratePage() {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="ex. Studio 103, Le Lieu Unique..."
+              maxLength={80}
               className="text-sm bg-[#f5f0eb] border border-[#ddd5cc] text-[#1a1a18] px-4 py-3 placeholder:text-[#5a5450] focus:border-[#1a1a18] outline-none tracking-wide"
               style={{ borderRadius: "2px" }}
             />
@@ -251,7 +254,7 @@ export default function CuratePage() {
               className="border border-[#b84a30] p-6 text-[#b84a30] text-sm tracking-wider bg-[#faf7f4]"
               role="alert"
             >
-              AUCUNE PAIRE VALIDE pour ce profil. Ajuster la tolérance au risque.
+              AUCUNE PAIRE VALIDE pour ce profil. Augmenter la tolérance au risque ou la flexibilité pour élargir les options.
             </div>
           ) : (
             <div>

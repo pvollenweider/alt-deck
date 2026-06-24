@@ -108,7 +108,7 @@ interface Card {
 | `MEDIUM` | Nécessite une concertation ou répétition courte | Ajustements mineurs (gain, placement) |
 | `HIGH` | Réorganisation de groupe ou accord complexe | Reconfiguration micros, espace, monitoring |
 
-### Deck complet (42 cartes)
+### Deck complet (45 cartes)
 
 **STRUCTURAL — 15 cartes**
 

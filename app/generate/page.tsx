@@ -116,7 +116,7 @@ export default function GeneratePage() {
           className="border border-[#b84a30] p-6 text-[#b84a30] text-sm tracking-wider bg-[#faf7f4]"
           role="alert"
         >
-          AUCUNE PAIRE VALIDE TROUVÉE. Cela ne devrait pas arriver. Vérifier les données des cartes.
+          AUCUNE PAIRE VALIDE TROUVÉE. Essayer CURATION pour affiner selon un profil de groupe, ou regénérer.
         </div>
       )}
 
@@ -136,6 +136,7 @@ export default function GeneratePage() {
                 <span className={`font-bold ${result.score1 >= 8 ? "text-[#1a1a18]" : "text-[#b84a30]"}`}>
                   {result.score1}
                 </span>
+                {result.score1 < 8 && <span className="sr-only"> (sous le seuil)</span>}
                 /15
               </span>
               <span>
@@ -143,6 +144,7 @@ export default function GeneratePage() {
                 <span className={`font-bold ${result.score2 >= 8 ? "text-[#1a1a18]" : "text-[#b84a30]"}`}>
                   {result.score2}
                 </span>
+                {result.score2 < 8 && <span className="sr-only"> (sous le seuil)</span>}
                 /15
               </span>
               <span className="text-[#6b6560]">Seuil : 8</span>
