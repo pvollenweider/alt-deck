@@ -86,7 +86,7 @@ export default function HomePage() {
               {section.detail}
             </div>
             <div className="text-xl font-bold text-[#1a1a18] tracking-widest mb-3 group-hover:text-[#b84a30] transition-colors font-mono">
-              {section.label} →
+              {section.label} <span aria-hidden="true">→</span>
             </div>
             <div className="text-[#6b6560] text-sm leading-relaxed">
               {section.description}

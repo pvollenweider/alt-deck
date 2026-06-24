@@ -44,9 +44,9 @@ export default function AboutPage() {
         </p>
 
         <div className="mb-6">
-          <div className="text-[#6b6560] text-xs tracking-widest uppercase mb-3 font-medium">
+          <h3 className="text-[#6b6560] text-xs tracking-widest uppercase mb-3 font-medium">
             Axe 1 — Nature (ce que la contrainte affecte)
-          </div>
+          </h3>
           <div className="grid grid-cols-2 gap-0 border border-[#ddd5cc]">
             {[
               { color: "#b84a30", label: "STRUCTURAL", desc: "Forme, temporalité, architecture" },
@@ -71,9 +71,9 @@ export default function AboutPage() {
         </div>
 
         <div>
-          <div className="text-[#6b6560] text-xs tracking-widest uppercase mb-3 font-medium">
+          <h3 className="text-[#6b6560] text-xs tracking-widest uppercase mb-3 font-medium">
             Axe 2 — Rôle (ce que la contrainte fait au système)
-          </div>
+          </h3>
           <div className="border border-[#ddd5cc] bg-[#faf7f4] divide-y divide-[#ddd5cc]">
             {[
               { label: "DESTRUCTIVE",    desc: "Supprime quelque chose d'essentiel" },
@@ -135,6 +135,7 @@ export default function AboutPage() {
             { phase: "PREPARATION", color: "#9a7820", dur: "calculé", desc: "Installation technique et concertation" },
             { phase: "LOCK",        color: "#b84a30", dur: "1:00",    desc: "Dernier calage avant le jeu" },
             { phase: "PLAYING",     color: "#2d7a53", dur: "—",       desc: "Session active" },
+            { phase: "COMPLETE",    color: "#1a1a18", dur: "—",       desc: "Session terminée" },
           ].map((p) => (
             <div key={p.phase} className="flex items-center gap-4 px-5 py-3">
               <span
