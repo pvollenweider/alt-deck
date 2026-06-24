@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { CARDS, Nature, totalScore, NATURE_BG } from "@/lib/cards";
 import { CardDisplay } from "@/components/CardDisplay";
 
@@ -12,6 +12,22 @@ export default function DeckPage() {
   const filtered = activeNature === "ALL"
     ? CARDS
     : CARDS.filter((c) => c.nature === activeNature);
+
+  const filterBarRef = useRef<HTMLDivElement>(null);
+
+  const handleFilterKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    const buttons = filterBarRef.current?.querySelectorAll<HTMLButtonElement>("button");
+    if (!buttons || buttons.length === 0) return;
+    const arr = Array.from(buttons);
+    const focused = arr.indexOf(document.activeElement as HTMLButtonElement);
+    if (focused === -1) return;
+    e.preventDefault();
+    const next = e.key === "ArrowRight"
+      ? (focused + 1) % arr.length
+      : (focused - 1 + arr.length) % arr.length;
+    arr[next].focus();
+  }, []);
 
   const natureCount = (n: Nature | "ALL") =>
     n === "ALL" ? CARDS.length : CARDS.filter((c) => c.nature === n).length;
@@ -33,8 +49,10 @@ export default function DeckPage() {
 
       {/* Filter bar */}
       <div
-        role="group"
+        role="toolbar"
         aria-label="Filtrer par nature"
+        ref={filterBarRef}
+        onKeyDown={handleFilterKeyDown}
         className="flex overflow-x-auto mb-8 sm:mb-10 border border-[#ddd5cc] w-fit max-w-full bg-[#faf7f4]"
       >
         {NATURES.map((n) => (

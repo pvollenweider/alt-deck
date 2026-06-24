@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { Card, totalScore, overallDifficulty, NATURE_BG, NATURE_BORDER, NATURE_DOT, ROLE_LABELS } from "@/lib/cards";
 import {
@@ -60,8 +61,27 @@ function saveSession(session: StoredSession) {
   }
 }
 
-function isValidCard(c: Card) {
-  return Array.isArray(c.rules) && c.difficulty != null && typeof c.difficulty === "object";
+const VALID_NATURES = new Set(["STRUCTURAL", "SONIC", "COGNITIVE", "PHYSICAL"]);
+const VALID_ROLES = new Set(["DESTRUCTIVE", "TRANSFORMATIVE", "CONSTRAINT", "STABILIZER"]);
+
+function isValidCard(c: unknown): c is Card {
+  if (!c || typeof c !== "object") return false;
+  const card = c as Record<string, unknown>;
+  return (
+    typeof card.id === "string" && card.id.length > 0 &&
+    typeof card.nature === "string" && VALID_NATURES.has(card.nature) &&
+    typeof card.role === "string" && VALID_ROLES.has(card.role) &&
+    typeof card.title === "string" &&
+    typeof card.description === "string" &&
+    Array.isArray(card.rules) &&
+    card.difficulty != null && typeof card.difficulty === "object" &&
+    typeof (card.difficulty as Record<string, unknown>).structural === "number" &&
+    typeof (card.difficulty as Record<string, unknown>).disorientation === "number" &&
+    typeof (card.difficulty as Record<string, unknown>).performance === "number" &&
+    typeof card.risk === "number" &&
+    Array.isArray(card.incompatibilities) &&
+    Array.isArray(card.synergies)
+  );
 }
 
 // ─── Print layout ─────────────────────────────────────────────────────────────
@@ -226,9 +246,8 @@ function PhaseBanner({
         <div className="flex items-center gap-3">
           {timed && (
             <span
-              role="timer"
               className="text-xl font-mono font-bold text-[#1a1a18]"
-              aria-label={`Temps restant : ${formatTime(timeLeftMs)}`}
+              aria-hidden="true"
             >
               {formatTime(timeLeftMs)}
             </span>
@@ -599,7 +618,7 @@ export default function SessionPage() {
             Aucune session active
           </div>
           <div className="text-[#6b6560] text-xs tracking-wider mb-8 sm:mb-10 max-w-md mx-auto leading-relaxed">
-            Aller sur GÉNÉRER ou CURATION pour créer une session, ou générer rapidement ici.
+            GÉNÉRER pour une session aléatoire, CURATION pour choisir selon le profil du groupe, ou générer rapidement ici.
           </div>
           {quickGenerateFailed && (
             <div className="text-[#b84a30] text-xs tracking-wider uppercase mb-6" role="alert">
@@ -614,13 +633,13 @@ export default function SessionPage() {
             >
               GÉNÉRATION RAPIDE →
             </button>
-            <button
-              onClick={() => router.push("/generate")}
-              className="text-sm tracking-widest px-8 sm:px-10 py-3 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4]"
+            <Link
+              href="/generate"
+              className="text-sm tracking-widest px-8 sm:px-10 py-3 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4] inline-block"
               style={{ borderRadius: "2px" }}
             >
               ALLER À GÉNÉRER
-            </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -729,6 +748,7 @@ export default function SessionPage() {
             <div className="flex items-center gap-2 flex-wrap justify-end sm:justify-start">
               <button
                 onClick={() => window.print()}
+                aria-label="Télécharger le PDF"
                 className="text-xs tracking-widest px-3 sm:px-5 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4] whitespace-nowrap"
                 style={{ borderRadius: "2px" }}
               >
@@ -779,7 +799,7 @@ export default function SessionPage() {
               </div>
               <div className="text-[#6b6560] text-xs tracking-wider">
                 Révélation 2 min · Préparation {session.prepTime} min · Verrouillage 1 min
-                <span className="ml-3 text-[#9b9690]">— Espace pour avancer</span>
+                <span className="ml-3 text-[#6b6560]">— Espace pour avancer</span>
               </div>
             </div>
             <button
@@ -831,6 +851,7 @@ export default function SessionPage() {
             <div className="flex gap-2 shrink-0 flex-wrap">
               <button
                 onClick={() => window.print()}
+                aria-label="Télécharger le PDF"
                 className="text-xs tracking-widest px-4 sm:px-6 py-2 border border-[#ddd5cc] text-[#6b6560] hover:text-[#1a1a18] hover:border-[#1a1a18] uppercase transition-colors bg-[#faf7f4] whitespace-nowrap"
                 style={{ borderRadius: "2px" }}
               >
@@ -856,7 +877,7 @@ export default function SessionPage() {
 
         {/* Session status bar */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border border-[#ddd5cc] bg-[#faf7f4] px-4 sm:px-6 py-3 mb-6 text-xs tracking-wider">
-          <span className="text-[#1a1a18] font-bold uppercase">✓ Valide</span>
+          <span className="text-[#1a1a18] font-bold uppercase"><span aria-hidden="true">✓ </span>Valide</span>
           <span className="text-[#6b6560]">
             Tension : <span className="text-[#1a1a18] font-bold">{tension.toFixed(1)}</span>
           </span>
