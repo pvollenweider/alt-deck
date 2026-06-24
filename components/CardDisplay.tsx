@@ -82,11 +82,12 @@ export function CardDisplay({ card, size = "default", showScore = true }: CardDi
 
       {/* Difficulty dots */}
       <div className="flex items-center gap-3 mt-auto">
-        <span className="text-[#6b6560] text-xs tracking-widest uppercase">Difficulté</span>
-        <div className="flex gap-1">
+        <span className="text-[#6b6560] text-xs tracking-widest uppercase" aria-hidden="true">Difficulté</span>
+        <div role="img" aria-label={`Difficulté : ${diff} sur 5`} className="flex gap-1">
           {[1, 2, 3, 4, 5].map((d) => (
             <div
               key={d}
+              aria-hidden="true"
               className={`w-2 h-2 rounded-full ${
                 d <= diff ? NATURE_DOT[card.nature] : "bg-[#ddd5cc]"
               }`}

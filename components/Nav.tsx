@@ -41,6 +41,7 @@ export function Nav() {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={pathname === item.href ? "page" : undefined}
                 className={`shrink-0 text-xs tracking-widest px-2 sm:px-4 py-2 uppercase font-medium transition-colors ${
                   pathname === item.href
                     ? "text-[#b84a30] font-bold"
