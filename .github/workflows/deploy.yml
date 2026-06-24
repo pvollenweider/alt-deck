@@ -1,0 +1,59 @@
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/pvollenweider/alt-deck:latest
+            ghcr.io/pvollenweider/alt-deck:${{ github.sha }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Apply manifests
+        run: kubectl apply -f k8s/
+
+      - name: Update image
+        run: |
+          kubectl set image deployment/alt-deck \
+            alt-deck=ghcr.io/pvollenweider/alt-deck:${{ github.sha }} \
+            -n alt-deck
+
+      - name: Wait for rollout
+        run: kubectl rollout status deployment/alt-deck -n alt-deck --timeout=120s
